@@ -1,0 +1,23 @@
+.build/
+dist/
+.swiftpm/
+.DS_Store
+docs/evidence/
+docs/LOCAL-QA.md
+
+# Local runtime state and credentials are not source code.
+/Containers/
+/Cache/
+/ConfigurationBackups/
+/LaunchRequests/
+/Logs/
+/state.json
+/state.previous.json
+.env
+.env.*
+!.env.example
+*.log
+*.p12
+*.p8
+*.key
+*.app/
