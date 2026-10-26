@@ -34,7 +34,7 @@ struct SteamSessionControls: View {
             HStack(spacing: 10) {
                 Button { model.openSteam(container) } label: {
                     Label(launchTitle, systemImage: running ? "macwindow" : pending != nil ? "hourglass" : "play.fill")
-                }.buttonStyle(.borderedProminent)
+                }.buttonStyle(.borderedProminent).tint(.harborAction)
                     .disabled(runtime == nil || model.isWorking || pending != nil || (model.hasLibraryConflict(container) && !running) || (runtime?.hasSteam == false && container.origin == .linked))
                 Button("正常退出 Steam", systemImage: "power") { model.requestStop(container) }
                     .disabled(!running || model.isWorking || pending != nil)

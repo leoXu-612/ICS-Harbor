@@ -41,7 +41,7 @@ struct ApplicationsView: View {
                                     }
                                 }.padding(.vertical, 5).tag(app.id)
                             }
-                        }.listStyle(.inset)
+                        }.listStyle(.inset).tint(.harborAction)
                         if filtered.isEmpty { Button("清除搜索") { query = "" }.padding(.bottom, 16) }
                     }.frame(minWidth: 200, idealWidth: 240, maxWidth: 300)
                     if let app = model.selectedApplication {
@@ -59,7 +59,7 @@ struct ApplicationsView: View {
             VStack(alignment: .leading, spacing: 20) {
                 PageHeading(title: app.name, subtitle: model.container(app.containerID)?.name ?? "环境不可用")
                 HStack {
-                    Button("启动应用", systemImage: "play.fill") { model.launchApplication(app) }.buttonStyle(.borderedProminent).controlSize(.large)
+                    Button("启动应用", systemImage: "play.fill") { model.launchApplication(app) }.buttonStyle(.borderedProminent).tint(.harborAction).controlSize(.large)
                         .disabled(model.isWorking || model.pendingLaunch(in: app.containerID) != nil)
                     Button("启动设置…") { model.editApplication(app) }
                     Menu {
@@ -135,7 +135,7 @@ struct ApplicationEditor: View {
                     guard let containerID else { return }
                     let value = WindowsApplication(id: model.editingApplication?.id ?? UUID(), containerID: containerID, name: name.trimmingCharacters(in: .whitespacesAndNewlines), executablePath: executable, workingDirectory: workingDirectory, arguments: arguments.components(separatedBy: .newlines).filter { !$0.isEmpty })
                     if model.saveApplication(value) { dismiss() }
-                }.buttonStyle(.borderedProminent).disabled(containerID == nil || executable.isEmpty || name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }.buttonStyle(.borderedProminent).tint(.harborAction).disabled(containerID == nil || executable.isEmpty || name.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }.padding(24).frame(width: 650, height: 590).onAppear {
             if let app = model.editingApplication { containerID = app.containerID; name = app.name; executable = app.executablePath; workingDirectory = app.workingDirectory; arguments = app.arguments.joined(separator: "\n"); advanced = true }
@@ -166,7 +166,7 @@ struct InstallApplicationView: View {
             if model.state.containers.allSatisfy({ $0.origin != .managed }) { Label("请先在运行环境页创建通用 Windows 环境。", systemImage: "info.circle").foregroundStyle(.orange) }
             HStack { Spacer(); Button("取消") { dismiss() }.keyboardShortcut(.cancelAction); Button("运行安装器") {
                 if let file, let id = containerID, let container = model.container(id) { dismiss(); model.installApplication(file, container: container); model.section = .applications }
-            }.buttonStyle(.borderedProminent).disabled(file == nil || containerID == nil || model.isWorking || containerID.map { model.runtime[$0]?.applicationReady != true || model.busy.contains($0) || model.pendingLaunch(in: $0) != nil } == true) }
+            }.buttonStyle(.borderedProminent).tint(.harborAction).disabled(file == nil || containerID == nil || model.isWorking || containerID.map { model.runtime[$0]?.applicationReady != true || model.busy.contains($0) || model.pendingLaunch(in: $0) != nil } == true) }
         }.padding(28).frame(width: 620).onAppear {
             if case .install(let id) = model.applicationGuidance { containerID = id }
             else { containerID = model.preferredInstallContainerID ?? model.state.containers.first(where: { $0.origin == .managed })?.id }

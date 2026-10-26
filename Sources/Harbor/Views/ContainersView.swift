@@ -63,7 +63,7 @@ struct BindDriveView: View {
             }
             HStack { Spacer(); Button("取消") { dismiss() }.keyboardShortcut(.cancelAction); Button("检查并绑定") {
                 if let id = selectedContainer, let container = model.container(id), let volume = model.volumes.first(where: { $0.id == volumeID }) { model.bindDrive(container: container, letter: letter, volume: volume) }
-            }.buttonStyle(.borderedProminent).disabled(selectedContainer == nil || volumeID.isEmpty) }
+            }.buttonStyle(.borderedProminent).tint(.harborAction).disabled(selectedContainer == nil || volumeID.isEmpty) }
         }.padding(28).frame(width: 510).onAppear { selectedContainer = model.state.containers.first?.id }
     }
 }

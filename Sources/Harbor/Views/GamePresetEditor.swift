@@ -100,7 +100,7 @@ struct GamePresetEditor: View {
                 Spacer()
                 Button("取消") { dismiss() }.keyboardShortcut(.cancelAction)
                 Button("保存预设") { if model.savePreset(draft, for: game) { dismiss() } }
-                    .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent).tint(.harborAction).keyboardShortcut(.defaultAction)
                     .disabled(draft == model.preset(game.id) || validation != nil || (!allowed && draft.modifiesRuntime))
             }.padding(18)
         }.frame(width: 660, height: 720)

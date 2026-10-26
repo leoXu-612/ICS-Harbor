@@ -34,7 +34,7 @@ struct LibraryView: View {
                     Surface {
                         VStack(spacing: 16) {
                             EmptyState(symbol: "shippingbox", title: "添加第一个运行环境", message: "可以关联已有的 Wine Steam，也可以创建独立环境。原有游戏和存档留在原处。")
-                            HStack { Button("关联已有环境") { model.linkContainer() }; Button("创建游戏环境") { model.presentCreate(.steam) }.buttonStyle(.borderedProminent) }.controlSize(.large).padding(.bottom, 18)
+                            HStack { Button("关联已有环境") { model.linkContainer() }; Button("创建游戏环境") { model.presentCreate(.steam) }.buttonStyle(.borderedProminent).tint(.harborAction) }.controlSize(.large).padding(.bottom, 18)
                         }
                     }
                 } else if model.games.isEmpty && model.isRefreshing {

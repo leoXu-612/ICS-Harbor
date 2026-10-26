@@ -52,7 +52,7 @@ struct ApplicationSetupView: View {
                 Text(title).font(.system(size: 24, weight: .semibold, design: .rounded))
                 Text(model.state.containers.contains(where: { $0.origin == .linked }) && next == .createEnvironment ? "你已有的关联环境保持原样。新软件使用独立环境，避免影响现有游戏。" : "安装包用于安装软件；安装完成后，再把程序本身添加到这里。").font(.system(size: 14)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 Button(action: model.guideApplicationSetup) { Label(button, systemImage: next == .createEnvironment ? "plus" : "arrow.right").padding(.horizontal, 8).padding(.vertical, 4) }
-                    .buttonStyle(.borderedProminent).controlSize(.large).padding(.top, 4)
+                    .buttonStyle(.borderedProminent).tint(.harborAction).controlSize(.large).padding(.top, 4)
             }
             Divider()
             VStack(alignment: .leading, spacing: 22) {

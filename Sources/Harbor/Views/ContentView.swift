@@ -18,7 +18,7 @@ struct ContentView: View {
                     Section("资料库") { sidebarRow(.library); sidebarRow(.applications) }
                     Section("管理") { sidebarRow(.containers); sidebarRow(.activity) }
                     Section("帮助") { sidebarRow(.guide); sidebarRow(.presets) }
-                }.listStyle(.sidebar)
+                }.listStyle(.sidebar).tint(.harborAction)
                 VStack(alignment: .leading, spacing: 12) {
                     if !model.conflictingLibraries.isEmpty {
                         Button { model.section = .containers } label: { Label("有库冲突待处理", systemImage: "exclamationmark.shield") }.buttonStyle(.plain).foregroundStyle(Color.harborFault)
@@ -84,7 +84,7 @@ struct ContentView: View {
         }
         .navigationTitle(model.section.title)
         .frame(minWidth: 980, minHeight: 680)
-        .tint(.harborAction)
+        .tint(.harbor)
         .sheet(isPresented: $model.showCreate) { CreateContainerView(model: model) }
         .sheet(isPresented: $model.showBind) { BindDriveView(model: model) }
         .sheet(isPresented: $model.showAddApplication) { ApplicationEditor(model: model) }

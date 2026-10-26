@@ -41,7 +41,7 @@ struct GameInspector: View {
                         Label(pending ? "正在启动…" : progress?.isObservedRunning == true ? "显示游戏窗口" : "启动游戏",
                               systemImage: pending ? "hourglass" : progress?.isObservedRunning == true ? "macwindow" : "play.fill")
                             .frame(maxWidth: .infinity).padding(.vertical, 5)
-                    }.buttonStyle(.borderedProminent).controlSize(.large).disabled((game.availability != .ready || conflict || model.isWorking || pending) && progress?.isObservedRunning != true)
+                    }.buttonStyle(.borderedProminent).tint(.harborAction).controlSize(.large).disabled((game.availability != .ready || conflict || model.isWorking || pending) && progress?.isObservedRunning != true)
                     if conflict {
                         Text("此环境存在共用库冲突，暂不能启动。请到运行环境查看原因。").font(.system(size: 12)).foregroundStyle(Color.harborFault)
                         Button("查看库冲突") { model.section = .containers }
