@@ -3,7 +3,7 @@ import HarborCore
 extension AppModel {
     var applicationGuidance: ApplicationGuidance {
         let pending = Set(launchProgress.values.filter(\.isPending).map(\.containerID))
-        return ApplicationGuidance.next(containers: state.containers, initialized: runtime.mapValues(\.initialized), busy: busy.union(pending), isWorking: isWorking)
+        return ApplicationGuidance.next(containers: state.containers, initialized: runtime.mapValues(\.applicationReady), busy: busy.union(pending), isWorking: isWorking)
     }
     func presentCreate(_ purpose: ContainerPurpose = .applications) { creationPurpose = purpose; showCreate = true }
     func guideApplicationSetup() {

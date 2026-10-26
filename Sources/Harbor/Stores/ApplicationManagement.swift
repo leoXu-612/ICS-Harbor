@@ -53,7 +53,8 @@ extension AppModel {
         Task {
             let plan = await Task.detached(priority: .userInitiated) { () -> Result<(URL, URL, String), Error> in
                 do {
-                    guard FileManager.default.isExecutableFile(atPath: container.launcher), RuntimeInfo.read(container).initialized else { throw HarborError.unavailable("请先完成这个运行环境的准备。") }
+                    let runtimeInfo = RuntimeInfo.read(container)
+                    guard FileManager.default.isExecutableFile(atPath: container.launcher), installing ? runtimeInfo.applicationReady : runtimeInfo.initialized else { throw HarborError.unavailable("请先完成这个运行环境的准备。") }
                     let busy = ProcessProbe.isBusy(container, entries: ProcessProbe.entries())
                     if installing {
                         guard container.origin == .managed,

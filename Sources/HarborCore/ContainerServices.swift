@@ -30,13 +30,26 @@ public struct RuntimeInfo: Sendable {
     public var renderer: String
     public var hasSteam: Bool
     public var initialized: Bool
+    public var applicationReady: Bool
     public static func read(_ container: ContainerRecord) -> RuntimeInfo {
         let fm = FileManager.default
         let dict = (try? Data(contentsOf: URL(fileURLWithPath: container.wrapperPath + "/Contents/Info.plist")))
             .flatMap { try? PropertyListSerialization.propertyList(from: $0, format: nil) as? [String: Any] } ?? [:]
         let renderer = (dict["D3DMETAL"] as? NSNumber)?.boolValue == true ? "D3DMetal" : (dict["DXVK"] as? NSNumber)?.boolValue == true ? "DXVK" : "DXMT"
         let version = (try? String(contentsOfFile: container.wrapperPath + "/Contents/SharedSupport/wine/version", encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
-        return RuntimeInfo(engine: version ?? "引擎尚未准备", renderer: dict.isEmpty ? "尚未配置" : renderer, hasSteam: fm.fileExists(atPath: container.steamExecutable), initialized: fm.fileExists(atPath: container.prefix + "/system.reg"))
+        let initialized = fm.fileExists(atPath: container.prefix + "/system.reg")
+        func marker(_ path: String, equals expected: String) -> Bool {
+            (try? String(contentsOfFile: path, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)) == expected
+        }
+        let ready = container.origin == .managed && initialized
+            && fm.isExecutableFile(atPath: container.launcher)
+            && fm.isExecutableFile(atPath: container.wrapperPath + "/Contents/SharedSupport/wine/bin/wine")
+            && fm.isReadableFile(atPath: container.prefix + "/drive_c/windows/system32/cmd.exe")
+            && marker(container.wrapperPath + "/Contents/HarborManagedRuntime", equals: container.id.uuidString)
+            && marker(container.prefix + "/.harbor-profile-ready", equals: "profile-ready-v1")
+            && marker(container.prefix + "/drive_c/harbor-ready.txt", equals: "HARBOR_WIN32_OK")
+            && (container.purpose != .applications || marker(container.prefix + "/drive_c/harbor-cjk-ready.txt", equals: "harbor-cjk-v1"))
+        return RuntimeInfo(engine: version ?? "引擎尚未准备", renderer: dict.isEmpty ? "尚未配置" : renderer, hasSteam: fm.fileExists(atPath: container.steamExecutable), initialized: initialized, applicationReady: ready)
     }
 }
 

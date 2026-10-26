@@ -159,14 +159,14 @@ struct InstallApplicationView: View {
             }.formStyle(.grouped).frame(height: 140)
             if let id = containerID, model.busy.contains(id) || model.pendingLaunch(in: id) != nil {
                 Label("这个环境仍在运行。请先保存并正常退出其中的程序。", systemImage: "pause.circle").font(.callout).foregroundStyle(Color.harborWarning)
-            } else if let id = containerID, model.runtime[id]?.initialized != true {
+            } else if let id = containerID, model.runtime[id]?.applicationReady != true {
                 Label("这个环境尚未准备完成。请先到运行环境页继续准备。", systemImage: "info.circle").font(.callout).foregroundStyle(Color.harborWarning)
             }
             Text("许可与登录由你完成。不会启动 Steam，不会自动接受协议或强制重启。").font(.system(size: 12)).foregroundStyle(.secondary)
             if model.state.containers.allSatisfy({ $0.origin != .managed }) { Label("请先在运行环境页创建通用 Windows 环境。", systemImage: "info.circle").foregroundStyle(.orange) }
             HStack { Spacer(); Button("取消") { dismiss() }.keyboardShortcut(.cancelAction); Button("运行安装器") {
                 if let file, let id = containerID, let container = model.container(id) { dismiss(); model.installApplication(file, container: container); model.section = .applications }
-            }.buttonStyle(.borderedProminent).disabled(file == nil || containerID == nil || model.isWorking || containerID.map { model.runtime[$0]?.initialized != true || model.busy.contains($0) || model.pendingLaunch(in: $0) != nil } == true) }
+            }.buttonStyle(.borderedProminent).disabled(file == nil || containerID == nil || model.isWorking || containerID.map { model.runtime[$0]?.applicationReady != true || model.busy.contains($0) || model.pendingLaunch(in: $0) != nil } == true) }
         }.padding(28).frame(width: 620).onAppear {
             if case .install(let id) = model.applicationGuidance { containerID = id }
             else { containerID = model.preferredInstallContainerID ?? model.state.containers.first(where: { $0.origin == .managed })?.id }

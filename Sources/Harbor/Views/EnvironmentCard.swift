@@ -7,7 +7,8 @@ struct EnvironmentCard: View {
     @State private var detailsExpanded = false
     private var info: RuntimeInfo? { model.runtime[container.id] }
     private var conflict: Bool { model.hasLibraryConflict(container) }
-    private var status: String { info == nil ? "正在检查" : info?.initialized != true ? "待准备" : model.busy.contains(container.id) ? "运行中" : "已停止" }
+    private var prepared: Bool { container.origin == .managed ? info?.applicationReady == true : info?.initialized == true }
+    private var status: String { info == nil ? "正在检查" : !prepared ? "待准备" : model.busy.contains(container.id) ? "运行中" : "已停止" }
     var body: some View {
         Surface(padding: 24) {
             VStack(alignment: .leading, spacing: 22) {
@@ -35,7 +36,7 @@ struct EnvironmentCard: View {
                     } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).frame(width: 24).accessibilityLabel("环境的高级操作")
                 }
                 if conflict { LibraryConflictNotice() }
-                if info?.initialized != true && container.origin == .managed {
+                if !prepared && container.origin == .managed {
                     TaskHint(title: "这个环境还需要准备", message: "继续之前的准备任务，不会另建或覆盖容器。", actionTitle: "继续准备") { model.provision(container) }
                         .disabled(model.isWorking || model.busy.contains(container.id))
                 }
