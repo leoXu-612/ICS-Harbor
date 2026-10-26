@@ -9,7 +9,7 @@ struct LibraryView: View {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeading(title: "游戏库", subtitle: model.lastRefreshedAt == nil && model.isRefreshing ? "正在读取本机 Steam 清单…" : "\(model.readyCount) 款已安装 · 游戏文件保留原位")
                 if !model.conflictingLibraries.isEmpty { LibraryConflictNotice { model.section = .containers } }
-                TaskHint(title: "选中游戏，在右侧启动", message: "不必先打开 Steam。调整画面或按键之外的运行参数，也从游戏详情进入。", symbol: "cursorarrow.click", actionTitle: "管理 Steam") { model.section = .containers }
+                TaskHint(title: "选中游戏，在右侧启动", message: "不必先打开 Steam。图形与启动设置在游戏详情的“游戏参数”中。", symbol: "cursorarrow.click", actionTitle: "管理 Steam") { model.section = .containers }
                 HStack(alignment: .center) {
                     Text(model.favoritesOnly ? "收藏" : "所有游戏").font(.system(size: 17, weight: .semibold))
                     Spacer()
@@ -55,7 +55,7 @@ struct LibraryView: View {
                 }
                 if !model.warnings.isEmpty {
                     VStack(alignment: .leading, spacing: 7) {
-                        ForEach(model.warnings.filter { !$0.contains("共用") }, id: \.self) { Label($0, systemImage: "info.circle").font(.system(size: 12)).foregroundStyle(.secondary) }
+                        ForEach(model.warnings.filter { !$0.contains("共用") && !$0.contains("同一游戏库") }, id: \.self) { Label($0, systemImage: "info.circle").font(.system(size: 12)).foregroundStyle(.secondary) }
                     }
                 }
                 HStack {
@@ -64,7 +64,7 @@ struct LibraryView: View {
                     if model.isRefreshing { ProgressView().controlSize(.mini); Text("正在读取磁盘…").font(.caption2) }
                     else if let date = model.lastRefreshedAt { Text("更新于 \(date.formatted(date: .omitted, time: .shortened))").font(.caption2).monospacedDigit() }
                 }.foregroundStyle(.tertiary).padding(.top, 4)
-            }.padding(28).frame(maxWidth: 1240, alignment: .leading).frame(maxWidth: .infinity, alignment: .topLeading)
+            }.padding(28).frame(maxWidth: .infinity, alignment: .topLeading)
         }.searchable(text: $model.search, placement: .toolbar, prompt: "搜索游戏或 App ID")
     }
 }
