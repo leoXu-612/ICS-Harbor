@@ -16,7 +16,7 @@ struct SettingsView: View {
                 Button("导出脱敏诊断…") { model.exportDiagnostics() }
             }
             Section("关于") {
-                LabeledContent("版本", value: "0.4.0 · 本地开发预览")
+                LabeledContent("版本", value: "\(AppPaths.version) · 本地开发预览")
                 Text("原生 macOS 游戏容器管理器。独立项目，非 Valve、Apple 或 Sikarugir 官方产品。尚未进行 Developer ID 公证，不作为公开正式发行版。").font(.caption).foregroundStyle(.secondary)
             }
         }.formStyle(.grouped).frame(width: 550, height: 480)

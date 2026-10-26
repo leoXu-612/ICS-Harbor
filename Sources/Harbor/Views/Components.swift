@@ -2,10 +2,11 @@ import SwiftUI
 import HarborCore
 
 extension Color {
-    static let harbor = Color(red: 0.204, green: 0.412, blue: 0.937)
-    static let harborSignal = Color(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: 0.31, green: 0.80, blue: 0.73, alpha: 1) : NSColor(red: 0.08, green: 0.49, blue: 0.45, alpha: 1) })
-    static let harborWarning = Color.orange
-    static let harborFault = Color.red
+    static let harborAction = Color(red: 0.18, green: 0.35, blue: 0.84)
+    static let harbor = Color(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: 0.52, green: 0.66, blue: 1, alpha: 1) : NSColor(red: 0.18, green: 0.35, blue: 0.84, alpha: 1) })
+    static let harborSignal = Color(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: 0.36, green: 0.81, blue: 0.72, alpha: 1) : NSColor(red: 0.07, green: 0.43, blue: 0.36, alpha: 1) })
+    static let harborWarning = Color(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: 1, green: 0.80, blue: 0.46, alpha: 1) : NSColor(red: 0.51, green: 0.30, blue: 0.04, alpha: 1) })
+    static let harborFault = Color(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: 1, green: 0.60, blue: 0.55, alpha: 1) : NSColor(red: 0.69, green: 0.13, blue: 0.09, alpha: 1) })
 }
 enum HarborMotion {
     static func feedback(reduced: Bool) -> Animation { reduced ? .easeOut(duration: 0.1) : .spring(response: 0.3, dampingFraction: 1) }
@@ -22,14 +23,13 @@ struct HarborTileButtonStyle: ButtonStyle {
 }
 
 struct Surface<Content: View>: View {
-    @Environment(\.accessibilityReduceTransparency) private var reducedTransparency
     @Environment(\.colorSchemeContrast) private var contrast
     var padding: CGFloat = 18
     @ViewBuilder var content: Content
     var body: some View {
         content.padding(padding)
-            .background(reducedTransparency ? AnyShapeStyle(Color(nsColor: .controlBackgroundColor)) : AnyShapeStyle(.regularMaterial), in: RoundedRectangle(cornerRadius: 14))
-            .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(.primary.opacity(contrast == .increased ? 0.35 : 0.07), lineWidth: 1) }
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
+            .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.primary.opacity(contrast == .increased ? 0.4 : 0.10), lineWidth: 1) }
     }
 }
 struct Pill: View {
@@ -38,7 +38,7 @@ struct Pill: View {
     var color: Color = .secondary
     var body: some View {
         HStack(spacing: 5) { if let symbol { Image(systemName: symbol) }; Text(title) }
-            .font(.system(size: 11, weight: .medium)).foregroundStyle(color)
+            .font(.system(size: 12, weight: .medium)).foregroundStyle(color)
             .padding(.horizontal, 9).padding(.vertical, 5)
             .background(color.opacity(0.10), in: Capsule())
     }
@@ -50,8 +50,8 @@ struct PageHeading: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             if !eyebrow.isEmpty { Text(eyebrow).font(.caption).foregroundStyle(.secondary) }
-            Text(title).font(.system(size: 23, weight: .semibold, design: .rounded)).tracking(-0.35)
-            Text(subtitle).font(.system(size: 13)).foregroundStyle(.secondary)
+            Text(title).font(.system(size: 28, weight: .semibold, design: .rounded)).tracking(-0.4)
+            Text(subtitle).font(.system(size: 13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
         }
     }
 }

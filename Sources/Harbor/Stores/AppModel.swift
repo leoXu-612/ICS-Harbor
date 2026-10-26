@@ -5,10 +5,10 @@ import OSLog
 import Observation
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case library, applications, containers, presets, activity
+    case library, applications, containers, presets, activity, guide
     var id: String { rawValue }
-    var title: String { switch self { case .library: return "游戏库"; case .applications: return "Windows 应用"; case .containers: return "运行环境"; case .presets: return "游戏预设"; case .activity: return "启动与任务" } }
-    var symbol: String { switch self { case .library: return "square.grid.2x2"; case .applications: return "app.badge"; case .containers: return "externaldrive"; case .presets: return "slider.horizontal.3"; case .activity: return "waveform.path.ecg" } }
+    var title: String { switch self { case .library: return "游戏库"; case .applications: return "Windows 应用"; case .containers: return "运行环境"; case .presets: return "参数说明"; case .activity: return "启动记录"; case .guide: return "使用指南" } }
+    var symbol: String { switch self { case .library: return "gamecontroller"; case .applications: return "app.badge"; case .containers: return "shippingbox"; case .presets: return "slider.horizontal.3"; case .activity: return "clock.arrow.circlepath"; case .guide: return "book.closed" } }
 }
 
 @MainActor @Observable final class AppModel {
@@ -28,6 +28,8 @@ enum AppSection: String, CaseIterable, Identifiable {
     var favoritesOnly = false
     var selectedGameID: String?
     var showCreate = false
+    var creationPurpose: ContainerPurpose = .applications
+    var preferredInstallContainerID: UUID?
     var showBind = false
     var showAddApplication = false
     var showInstallApplication = false

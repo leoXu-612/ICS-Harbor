@@ -14,10 +14,10 @@ import AppKit
         }
         .defaultSize(width: 1200, height: 800)
         .commands {
-            CommandGroup(replacing: .newItem) { Button("新建托管容器…") { model.showCreate = true }.keyboardShortcut("n") }
+            CommandGroup(replacing: .newItem) { Button("创建运行环境…") { model.presentCreate() }.keyboardShortcut("n") }
             CommandMenu("Windows 应用") {
-                Button("安装 EXE / MSI…") { model.showInstallApplication = true }
-                Button("添加已安装 EXE…") { model.addApplication() }.keyboardShortcut("i", modifiers: [.command, .shift])
+                Button("安装 EXE / MSI…") { model.section = .applications; model.guideApplicationSetup() }
+                Button("添加已安装 EXE…") { model.addApplication() }.keyboardShortcut("i", modifiers: [.command, .shift]).disabled(model.state.containers.isEmpty)
                 Divider()
                 Button("启动所选应用") { if let app = model.selectedApplication { model.launchApplication(app) } }.disabled(model.selectedApplication == nil || model.isWorking)
             }
@@ -30,6 +30,7 @@ import AppKit
                 Divider()
                 Button("导出脱敏诊断…") { model.exportDiagnostics() }
             }
+            CommandGroup(replacing: .help) { Button("Harbor 使用指南") { model.section = .guide }.keyboardShortcut("?", modifiers: .command) }
         }
         Settings { SettingsView(model: model).preferredColorScheme(colorScheme) }
     }

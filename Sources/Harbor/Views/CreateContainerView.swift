@@ -30,7 +30,7 @@ struct CreateContainerView: View {
                 Button("取消") { dismiss() }.keyboardShortcut(.cancelAction)
                 Button("下载并创建") { model.createContainer(name: name, purpose: purpose) }.buttonStyle(.borderedProminent).disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || model.isWorking)
             }.controlSize(.large)
-        }.padding(30).frame(width: 580)
+        }.padding(30).frame(width: 580).onAppear { purpose = model.creationPurpose; name = purpose == .steam ? "Steam 游戏" : "Windows 应用" }
     }
     private func row(_ title: String, _ value: String) -> some View { HStack { Text(title).font(.caption).foregroundStyle(.secondary).frame(width: 80, alignment: .leading); Text(value).font(.system(size: 12, weight: .medium)); Spacer() } }
 }

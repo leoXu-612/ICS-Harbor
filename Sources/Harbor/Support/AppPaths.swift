@@ -1,6 +1,7 @@
 import Foundation
 
 enum AppPaths {
+    static var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "开发版" }
     static var root: URL {
         let arguments = ProcessInfo.processInfo.arguments
         if let index = arguments.firstIndex(of: "--data-root"), arguments.count > index + 1, arguments[index + 1].hasPrefix("/") {

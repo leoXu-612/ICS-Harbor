@@ -26,8 +26,8 @@ struct SteamSessionControls: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 9) {
-                Label("Steam", systemImage: "app").font(.callout.weight(.semibold))
-                Text("启动器").font(.caption).foregroundStyle(.secondary)
+                Label("Steam", systemImage: "app").font(.system(size: 19, weight: .semibold))
+                Text("客户端").font(.system(size: 12)).foregroundStyle(.secondary)
                 Spacer()
                 Text(status).font(.caption).foregroundStyle(running && signal?.connection == .online ? Color.harborSignal : .secondary)
             }
@@ -35,12 +35,12 @@ struct SteamSessionControls: View {
                 Button { model.openSteam(container) } label: {
                     Label(launchTitle, systemImage: running ? "macwindow" : pending != nil ? "hourglass" : "play.fill")
                 }.buttonStyle(.borderedProminent)
-                    .disabled(runtime == nil || model.isWorking || pending != nil || (runtime?.hasSteam == false && container.origin == .linked))
+                    .disabled(runtime == nil || model.isWorking || pending != nil || (model.hasLibraryConflict(container) && !running) || (runtime?.hasSteam == false && container.origin == .linked))
                 Button("正常退出 Steam", systemImage: "power") { model.requestStop(container) }
                     .disabled(!running || model.isWorking || pending != nil)
             }.controlSize(.large)
-            Text("退出前请先保存并关闭 Steam 游戏。此操作不是结束整个 Wine 环境。")
-                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            Text(running ? "先保存并退出游戏，再正常退出 Steam。关闭 Harbor 不会停止这个环境。" : "安装新游戏、处理登录或更新提示，都从这里打开 Steam；已有游戏可从游戏库直接启动。")
+                .font(.system(size: 13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
         }
     }
 }

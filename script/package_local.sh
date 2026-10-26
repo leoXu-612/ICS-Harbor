@@ -9,8 +9,8 @@ cleanup() {
   case "$TEMP_STAGE" in "$ROOT"/dist/.harbor-package.*) /bin/rm -r "$TEMP_STAGE" ;; esac
 }
 trap cleanup EXIT
-STAGE="$TEMP_STAGE/Harbor-0.4.0-Preview"
-ARCHIVE="$ROOT/dist/Harbor-0.4.0-Preview.zip"
+STAGE="$TEMP_STAGE/Harbor-0.5.0-Preview"
+ARCHIVE="$ROOT/dist/Harbor-0.5.0-Preview.zip"
 mkdir -p "$STAGE"
 ditto "$ROOT/dist/Harbor.app" "$STAGE/Harbor.app"
 cp README.md THIRD_PARTY_NOTICES.md LICENSE "$STAGE/"
@@ -22,5 +22,5 @@ codesign --verify --strict "$STAGE/Harbor.app"
 # Write a temporary complete archive before replacing the previous generated copy.
 ditto -c -k --keepParent --norsrc "$STAGE" "$ARCHIVE.partial"
 mv -f "$ARCHIVE.partial" "$ARCHIVE"
-(cd "$ROOT/dist" && shasum -a 256 Harbor-0.4.0-Preview.zip) > "$ARCHIVE.sha256"
+(cd "$ROOT/dist" && shasum -a 256 Harbor-0.5.0-Preview.zip) > "$ARCHIVE.sha256"
 printf 'Local preview archive: %s\nNot notarized; no public release was performed.\n' "$ARCHIVE"
