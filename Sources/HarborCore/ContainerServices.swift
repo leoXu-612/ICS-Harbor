@@ -90,6 +90,22 @@ public enum VolumeScanner {
 }
 
 public enum DriveMapper {
+    public static func restoreBindings(_ bindings: [DriveBinding], containers: [ContainerRecord], volumes: [MountedVolume]) -> [String] {
+        // Bindings are explicit consent to restore this drive for this volume UUID.
+        // Reuse the non-overwriting operation: never redirect an occupied letter,
+        // including dangling links, or guess by the disk's display name.
+        var warnings: [String] = []
+        for binding in bindings {
+            guard let container = containers.first(where: { $0.id == binding.containerID }),
+                  let target = target(for: binding, volumes: volumes) else { continue }
+            do {
+                try createMissingLink(container: container, letter: binding.letter, target: target, allowLinkedRepair: true)
+            } catch {
+                warnings.append("\(container.name) · \(binding.letter): 自动恢复未完成：\(error.localizedDescription)")
+            }
+        }
+        return warnings
+    }
     public static func createMissingLink(container: ContainerRecord, letter: String, target: URL, allowLinkedRepair: Bool = false) throws {
         guard container.origin == .managed || allowLinkedRepair else { throw HarborError.protected("关联容器需要单独确认盘符修复。") }
         guard letter.count == 1, let char = letter.first, char.isASCII, char.isLetter, !["c", "z"].contains(letter.lowercased()) else {

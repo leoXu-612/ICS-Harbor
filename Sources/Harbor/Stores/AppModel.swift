@@ -118,11 +118,14 @@ enum AppSection: String, CaseIterable, Identifiable {
         busy = Set(containers.filter { ProcessProbe.isBusy($0, entries: status.1) }.map(\.id))
         await pollLaunches(includeIdleContainers: true)
         let steamContainers = containers.filter { $0.preparesSteam || runtime[$0.id]?.hasSteam == true }
+        let bindings = state.bindings
         let result = await Task.detached(priority: .utility) {
-            (steamContainers.map { SteamScanner.scan($0) }, VolumeScanner.mounted())
+            let volumes = VolumeScanner.mounted()
+            let driveWarnings = DriveMapper.restoreBindings(bindings, containers: containers, volumes: volumes)
+            return (steamContainers.map { SteamScanner.scan($0) }, volumes, driveWarnings)
         }.value
         games = result.0.flatMap(\.games); libraries = result.0.flatMap(\.libraries)
-        warnings = result.0.flatMap(\.warnings)
+        warnings = result.0.flatMap(\.warnings) + result.2
         conflictingLibraries = detectConflicts(libraries)
         if !conflictingLibraries.isEmpty { warnings.append("检测到原生 Mac Steam 与 Wine 登记了同一游戏库。相关启动已阻止，请先分开库目录；不会自动删除或移动文件。") }
         volumes = result.1
@@ -264,7 +267,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     }
     func bindDrive(container: ContainerRecord, letter: String, volume: MountedVolume) {
         guard let uuid = volume.uuid else { errorMessage = "无法读取卷标识，未建立自动恢复绑定。"; return }
-        guard Panels.confirm(title: "绑定 \(letter.uppercased()): → \(volume.name)？", message: "只会创建缺失的盘符链接，不替换已有映射、不改写 Steam 库配置、不停止程序。Steam 可能需要正常退出后重开，才能重新识别这个库。", action: "建立映射") else { return }
+        guard Panels.confirm(title: "绑定 \(letter.uppercased()): → \(volume.name)？", message: "保存磁盘唯一标识；重连或重新打开 Harbor 时自动补回缺失的盘符。不会替换已有映射、改写 Steam 库配置或停止程序。Steam 可能需要正常退出后重开，才能重新识别这个库。", action: "建立映射") else { return }
         do {
             try DriveMapper.createMissingLink(container: container, letter: letter, target: URL(fileURLWithPath: volume.path), allowLinkedRepair: true)
             let binding = DriveBinding(containerID: container.id, letter: letter.uppercased(), volumeUUID: uuid, volumeName: volume.name)

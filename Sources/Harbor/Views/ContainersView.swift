@@ -23,7 +23,7 @@ struct ContainersView: View {
                 Divider().padding(.top, 8)
                 DisclosureGroup("外置盘与盘符 · 高级维护", isExpanded: $drivesExpanded) {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("已有映射可继续使用，不需要为新版重新绑定。这里只创建缺失链接，不替换已有盘符，也不会登记或删除 Steam 游戏库。")
+                        Text("绑定后会按磁盘唯一标识，在重连时自动补回缺失盘符。已有盘符不会被替换，Steam 库登记也不会改动。")
                             .font(.system(size: 13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         ForEach(model.state.bindings) { binding in
                             HStack {
@@ -49,7 +49,7 @@ struct BindDriveView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             Label("绑定外置磁盘", systemImage: "externaldrive.badge.plus").font(.title2.weight(.bold))
-            Text("只建立缺失映射。若该盘符已有其他目标，Harbor 会停止并说明原因。").font(.callout).foregroundStyle(.secondary)
+            Text("保存磁盘唯一标识，重连后自动恢复缺失映射。若盘符已有其他目标，Harbor 会保留原映射并说明原因。").font(.callout).foregroundStyle(.secondary)
             Form {
                 Picker("容器", selection: $selectedContainer) { ForEach(model.state.containers) { Text($0.name).tag(Optional($0.id)) } }
                 Picker("磁盘", selection: $volumeID) {

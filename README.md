@@ -2,7 +2,7 @@
 
 A native macOS manager for Windows applications and Steam games, powered by Wine.
 
-ICS-Harbor 是 ICS 系列的原生 macOS Windows 应用与 Steam 游戏管理器。Harbor 意为“港湾”，沿用已有帆船标识与应用名称。0.5.0 是可在本机运行的开发预览，不是已公证的公开正式发行版。
+ICS-Harbor 是 ICS 系列的原生 macOS Windows 应用与 Steam 游戏管理器。Harbor 意为“港湾”，沿用已有帆船标识与应用名称。0.5.1 是可在本机运行的开发预览，不是已公证的公开正式发行版。
 
 仓库与项目名称为 **ICS-Harbor**；应用仍为 `Harbor.app`，现有数据目录、Bundle ID 和容器路径不变，不因项目命名而迁移用户数据。
 
@@ -12,7 +12,7 @@ Harbor 不捆绑 Windows、Steam、Wine 引擎或游戏。它管理独立环境�
 
 ## 使用
 
-解压 `Harbor-0.5.0-Preview.zip`，将 `Harbor.app` 放入“应用程序”，双击打开。此预览为 Apple Silicon 构建，需要 macOS 14.6 或更新版本和 Rosetta。首次准备组件下载约 266 MB，容器所在盘需至少 10 GiB 可用空间，应用与游戏空间另计。
+解压 `Harbor-0.5.1-Preview.zip`，将 `Harbor.app` 放入“应用程序”，双击打开。此预览为 Apple Silicon 构建，需要 macOS 14.6 或更新版本和 Rosetta。首次准备组件下载约 266 MB，容器所在盘需至少 10 GiB 可用空间，应用与游戏空间另计。
 
 0.5 将导航分为“资料库 / 管理 / 帮助”。日常启动在游戏或应用详情中完成，Steam 生命周期仍统一在“运行环境”。“使用指南”可直接跳转到具体操作；应用空状态根据现有环境推荐创建、继续准备、安装或等待。技术参数与盘符维护按需展开，已有库冲突优先显示，不自动改写库配置。此次界面升级不改变容器索引或状态文件 schema。
 
@@ -33,7 +33,7 @@ Harbor 不捆绑 Windows、Steam、Wine 引擎或游戏。它管理独立环境�
 1. 已有 Sikarugir 容器：首次启动会识别常用目录。也可点右上角 **+ → 关联现有 Wine 容器**，选择其 `.app`。关联不会复制账号、游戏、存档或初始化原环境。
 2. 没有容器：**+ → 新建托管容器 → Steam 游戏**，命名并下载。进度在“启动与任务”显示。Steam 原版安装器出现后，请本人完成安装、许可、登录和 Steam Guard。保持默认 Steam 安装路径。
 3. 在该容器的 Steam 中安装游戏，然后回到 Harbor 刷新。点游戏卡片，选择“启动游戏”。封面只读取本机 Steam 缓存；没有封面时显示占位图。
-4. 外置盘在“运行环境”检查。Harbor 可在确认后建立缺失的 Wine 盘符，按卷 UUID 识别磁盘，不覆盖已有不同映射。**盘符映射与 Steam 库登记是两个步骤**，后者仍需在 Wine Steam 的设置中确认。macOS 若弹出外置盘访问确认，请本人允许 Harbor 访问所选磁盘；无需完整磁盘访问权限。
+4. 外置盘在“运行环境”检查。确认绑定后，Harbor 保存卷 UUID，并在重连、启动或定时刷新时补回缺失的 Wine 盘符，不覆盖已有不同映射（包括失效链接）。未绑定的旧映射不会自动接管；首次需要绑定一次。**盘符映射与 Steam 库登记是两个步骤**，后者仍需在 Wine Steam 的设置中确认。macOS 若弹出外置盘访问确认，请本人允许 Harbor 访问所选磁盘；无需完整磁盘访问权限。若 Steam 自身未刷新库，正常退出后重开 Steam。
 5. 在游戏详情点“游戏参数…”，按显示与性能、同步与兼容性、诊断、启动行为四组保存预设。关联容器默认只读；明确允许后先保存原始配置，再开放有限图形参数管理。关联身份、存档、键位和插件不改变。
 
 ### 统一管理启动器
@@ -105,7 +105,7 @@ Codex 的 Run 按钮使用同一脚本。其他参数：`--build-only`、`--logs
 ./script/package_local.sh
 ```
 
-默认输出 `dist/Harbor-0.5.0-Preview.zip` 及 SHA-256。应用资源从 `.app/Contents/Resources` 读取，不依赖源码或 SwiftPM 的绝对构建路径。GUI 可用 `--data-root /absolute/test/path` 隔离验收数据。升级前应备份 `state.json`；回退旧版应用需使用对应的状态备份，避免旧版丢弃新增应用记录或无法读取新增任务类型。
+默认输出 `dist/Harbor-0.5.1-Preview.zip` 及 SHA-256。应用资源从 `.app/Contents/Resources` 读取，不依赖源码或 SwiftPM 的绝对构建路径。GUI 可用 `--data-root /absolute/test/path` 隔离验收数据。升级前应备份 `state.json`；回退旧版应用需使用对应的状态备份，避免旧版丢弃新增应用记录或无法读取新增任务类型。
 
 ## 状态与限制
 
