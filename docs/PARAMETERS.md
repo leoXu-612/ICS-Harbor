@@ -6,7 +6,7 @@
 
 | 参数 | 实际映射 | 范围与限制 |
 | --- | --- | --- |
-| 图形后端 | D3DMETAL / DXVK | 继承、DXMT、DXVK；不增加未经验证的 DX12 后端 |
+| 图形后端 | D3DMETAL / DXVK | 继承、DXMT、DXVK、D3DMetal；D3DMetal 需环境已有对应组件，不自动下载安装，游戏兼容性需实测 |
 | DXMT 帧率上限 | d3d11.preferredMaxFrameRate | 继承、不限、30/60/90/120/144/165/240；刷新率可能使实际值不同 |
 | 强制 SDR | dxgi.forceSDR | 只改变 DXGI 的报告；关闭不意味着启用 HDR |
 | 全屏切换处理 | dxgi.handleAltTab | DXMT 处理独占全屏 Alt/Cmd+Tab；不是窗口/全屏模式开关 |

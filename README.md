@@ -2,7 +2,7 @@
 
 A native macOS manager for Windows applications and Steam games, powered by Wine.
 
-ICS-Harbor 是 ICS 系列的原生 macOS Windows 应用与 Steam 游戏管理器。Harbor 意为“港湾”，沿用已有帆船标识与应用名称。0.5.1 是可在本机运行的开发预览，不是已公证的公开正式发行版。
+ICS-Harbor 是 ICS 系列的原生 macOS Windows 应用与 Steam 游戏管理器。Harbor 意为“港湾”，沿用已有帆船标识与应用名称。0.5.2 是可在本机运行的开发预览，不是已公证的公开正式发行版。
 
 仓库与项目名称为 **ICS-Harbor**；应用仍为 `Harbor.app`，现有数据目录、Bundle ID 和容器路径不变，不因项目命名而迁移用户数据。
 
@@ -12,7 +12,7 @@ Harbor 不捆绑 Windows、Steam、Wine 引擎或游戏。它管理独立环境�
 
 ## 使用
 
-解压 `Harbor-0.5.1-Preview.zip`，将 `Harbor.app` 放入“应用程序”，双击打开。此预览为 Apple Silicon 构建，需要 macOS 14.6 或更新版本和 Rosetta。首次准备组件下载约 266 MB，容器所在盘需至少 10 GiB 可用空间，应用与游戏空间另计。
+解压 `Harbor-0.5.2-Preview.zip`，将 `Harbor.app` 放入“应用程序”，双击打开。此预览为 Apple Silicon 构建，需要 macOS 14.6 或更新版本和 Rosetta。首次准备组件下载约 266 MB，容器所在盘需至少 10 GiB 可用空间，应用与游戏空间另计。
 
 0.5 将导航分为“资料库 / 管理 / 帮助”。日常启动在游戏或应用详情中完成，Steam 生命周期仍统一在“运行环境”。“使用指南”可直接跳转到具体操作；应用空状态根据现有环境推荐创建、继续准备、安装或等待。技术参数与盘符维护按需展开，已有库冲突优先显示，不自动改写库配置。此次界面升级不改变容器索引或状态文件 schema。
 
@@ -57,6 +57,7 @@ Steam 的启动、显示窗口、在线状态和正常退出统一放在“运�
 | 继承 | 已授权环境恢复首次备份的对应参数；未授权关联容器不改配置 |
 | DXMT | 使用该固定引擎提供的 Direct3D 10/11 → Metal 路径 |
 | DXVK | 使用该引擎的另一条图形路径，用于逐游戏对照测试 |
+| D3DMetal | 使用环境已安装的 Direct3D 11/12 → Metal 组件；兼容性仍需逐游戏验证 |
 | DXMT 显示参数 | 帧率上限、强制 SDR、独占全屏切换处理；按本地组件能力开放 |
 | 同步 | 继承、原双开方式、仅 M-Sync、仅 E-Sync、关闭；不是 VSync |
 | 诊断 | Metal HUD 继承/开/关；Wine 日志继承/仅错误/错误与警告 |
@@ -105,7 +106,7 @@ Codex 的 Run 按钮使用同一脚本。其他参数：`--build-only`、`--logs
 ./script/package_local.sh
 ```
 
-默认输出 `dist/Harbor-0.5.1-Preview.zip` 及 SHA-256。应用资源从 `.app/Contents/Resources` 读取，不依赖源码或 SwiftPM 的绝对构建路径。GUI 可用 `--data-root /absolute/test/path` 隔离验收数据。升级前应备份 `state.json`；回退旧版应用需使用对应的状态备份，避免旧版丢弃新增应用记录或无法读取新增任务类型。
+默认输出 `dist/Harbor-0.5.2-Preview.zip` 及 SHA-256。应用资源从 `.app/Contents/Resources` 读取，不依赖源码或 SwiftPM 的绝对构建路径。GUI 可用 `--data-root /absolute/test/path` 隔离验收数据。升级前应备份 `state.json`；回退旧版应用需使用对应的状态备份，避免旧版丢弃新增应用记录或无法读取新增任务类型。
 
 ## 状态与限制
 

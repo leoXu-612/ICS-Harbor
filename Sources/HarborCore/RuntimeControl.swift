@@ -53,7 +53,7 @@ public enum RuntimeControl {
         (dictionary["D3DMETAL"] as? NSNumber)?.boolValue == true ? "D3DMetal" : (dictionary["DXVK"] as? NSNumber)?.boolValue == true ? "DXVK" : "DXMT"
     }
     public static func effectiveRenderer(_ preset: GamePreset, baseline: [String: Any]) -> String {
-        preset.renderer == .inherit ? rendererName(baseline) : preset.renderer == .dxmt ? "DXMT" : "DXVK"
+        preset.renderer == .inherit ? rendererName(baseline) : preset.renderer.title
     }
 }
 

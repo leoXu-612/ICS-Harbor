@@ -2,6 +2,32 @@ import XCTest
 @testable import HarborCore
 
 final class PresetTests: XCTestCase {
+    func testD3DMetalPresetEnablesDX12AndRestoresOriginalRenderer() throws {
+        let renderer = try XCTUnwrap(Renderer(rawValue: "d3dmetal"))
+        let preset = GamePreset(renderer: renderer)
+        XCTAssertEqual(try JSONDecoder().decode(GamePreset.self, from: JSONEncoder().encode(preset)), preset)
+        let (container, backups, original) = try fixture()
+        try RuntimeControl.authorizeLinked(container, root: backups, busy: false)
+        try LaunchPolicy.apply(preset, container: container, backupRoot: backups, busy: false)
+        XCTAssertEqual(try current(container)["D3DMETAL"] as? Int, 1)
+        XCTAssertEqual(try current(container)["DXVK"] as? Int, 0)
+        XCTAssertEqual(RuntimeControl.effectiveRenderer(preset, baseline: [:]), "D3DMetal")
+        XCTAssertThrowsError(try LaunchPolicy.apply(.init(), container: container, backupRoot: backups, busy: true))
+        try LaunchPolicy.apply(.init(), container: container, backupRoot: backups, busy: false)
+        let baseline = try PropertyListSerialization.propertyList(from: original, format: nil) as! [String: Any]
+        XCTAssertEqual(NSDictionary(dictionary: try current(container)), NSDictionary(dictionary: baseline))
+    }
+
+    func testD3DMetalRejectsDXMTOnlyOptions() throws {
+        let renderer = try XCTUnwrap(Renderer(rawValue: "d3dmetal"))
+        let (container, backups, original) = try fixture(dxmt: true)
+        try RuntimeControl.authorizeLinked(container, root: backups, busy: false)
+        var preset = GamePreset(renderer: renderer)
+        preset.forceSDR = .enabled
+        XCTAssertThrowsError(try LaunchPolicy.apply(preset, container: container, backupRoot: backups, busy: false))
+        XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: container.wrapperPath + "/Contents/Info.plist")), original)
+    }
+
     private func fixture(origin: ContainerOrigin = .linked, dxmt: Bool = false) throws -> (ContainerRecord, URL, Data) {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("HarborPresetTests-" + UUID().uuidString)
         let container = ContainerRecord(name: "Fixture", wrapperPath: root.appendingPathComponent("Runtime.app").path, origin: origin)

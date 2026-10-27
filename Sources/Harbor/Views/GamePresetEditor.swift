@@ -10,7 +10,7 @@ struct GamePresetEditor: View {
     private var container: ContainerRecord? { model.container(game.containerID) }
     private var allowed: Bool { container.map { model.canCustomize($0) } ?? false }
     private var effectiveRenderer: String {
-        if draft.renderer != .inherit { return draft.renderer == .dxmt ? "DXMT" : "DXVK" }
+        if draft.renderer != .inherit { return draft.renderer.title }
         return container.map { model.originalRenderer($0) } ?? "待确认"
     }
     private var validation: String? {
@@ -46,6 +46,7 @@ struct GamePresetEditor: View {
                     Picker("图形后端", selection: $draft.renderer) {
                         ForEach(Renderer.allCases) { Text($0.title).tag($0) }
                     }.disabled(!allowed)
+                    Text(draft.renderer.subtitle).font(.caption).foregroundStyle(.secondary)
                     LabeledContent("有效后端", value: effectiveRenderer)
                     Picker("DXMT 帧率上限", selection: $draft.frameLimit) {
                         ForEach(FrameLimit.allCases) { Text($0.title).tag($0) }

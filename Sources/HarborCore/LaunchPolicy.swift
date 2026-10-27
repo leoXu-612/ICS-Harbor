@@ -23,7 +23,7 @@ public enum LaunchPolicy {
     public static func applying(_ preset: GamePreset, to dictionary: [String: Any]) -> [String: Any] {
         var result = dictionary
         if preset.renderer != .inherit {
-            result["D3DMETAL"] = 0
+            result["D3DMETAL"] = preset.renderer == .d3dmetal ? 1 : 0
             result["DXVK"] = preset.renderer == .dxvk ? 1 : 0
         }
         if preset.sync != .inherit {

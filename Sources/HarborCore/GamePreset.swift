@@ -1,10 +1,10 @@
 import Foundation
 
 public enum Renderer: String, Codable, CaseIterable, Identifiable, Sendable {
-    case inherit, dxmt, dxvk
+    case inherit, dxmt, dxvk, d3dmetal
     public var id: String { rawValue }
-    public var title: String { switch self { case .inherit: return "继承原始配置"; case .dxmt: return "DXMT"; case .dxvk: return "DXVK" } }
-    public var subtitle: String { switch self { case .inherit: return "恢复该环境备份的原始参数"; case .dxmt: return "Direct3D 10/11 → Metal"; case .dxvk: return "对照测试 · 兼容性因游戏而异" } }
+    public var title: String { switch self { case .inherit: return "继承原始配置"; case .dxmt: return "DXMT"; case .dxvk: return "DXVK"; case .d3dmetal: return "D3DMetal" } }
+    public var subtitle: String { switch self { case .inherit: return "恢复该环境备份的原始参数"; case .dxmt: return "Direct3D 10/11 → Metal"; case .dxvk: return "对照测试 · 兼容性因游戏而异"; case .d3dmetal: return "Direct3D 11/12 → Metal · 需环境已安装此组件" } }
 }
 public enum SyncMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case inherit, enabled, msync, esync, disabled
