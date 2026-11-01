@@ -18,9 +18,9 @@ final class StandaloneSmokeTests: XCTestCase {
         func run(_ args: [String], name: String) throws {
             let script = root.appendingPathComponent(name + ".cmd"), result = root.appendingPathComponent(name + ".exit")
             let batch = try WindowsCommand.batch(executable: WindowsCommand.windowsPath(tool, container: container), workingDirectory: WindowsCommand.windowsPath(root, container: container), arguments: args, installer: false, resultPath: WindowsCommand.windowsPath(result, container: container))
-            try batch.write(to: script, atomically: true, encoding: .utf8)
+            let launcher = try WindowsCommand.writeLaunchRequest(batch, to: script)
             let process = Process(); process.executableURL = URL(fileURLWithPath: container.launcher)
-            process.arguments = ["WSS-installer", script.path]
+            process.arguments = ["WSS-installer", launcher.path]
             process.standardOutput = FileHandle.nullDevice; process.standardError = FileHandle.nullDevice
             try process.run()
             let deadline = Date().addingTimeInterval(45)

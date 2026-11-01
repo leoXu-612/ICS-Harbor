@@ -63,6 +63,23 @@ extension AppModel {
             if self.launchProgress[record.id]?.outcome == .windowDetected || (game != nil && existing[record.id]?.gamePID != nil) {
                 self.focusLaunch(record.id); return
             }
+            if game?.appID == NierDisplayConfiguration.appID {
+                do {
+                    self.notice = "正在检查 NieR 显示配置…"
+                    let repair = try await NierDisplayPreflight.run(container: container, requests: AppPaths.requests, backupRoot: backupRoot) {
+                        self.launchProgress[record.id]?.isPending != true
+                    }
+                    guard self.launchProgress[record.id]?.isPending == true else { return }
+                    self.notice = repair.message
+                    if let index = self.state.activity.firstIndex(where: { $0.id == record.id }) {
+                        self.state.activity[index].log += repair.message + "\n"
+                    }
+                    self.save()
+                } catch {
+                    guard self.launchProgress[record.id]?.isPending == true else { return }
+                    self.failLaunch(record.id, reason: error.localizedDescription); return
+                }
+            }
             self.dispatchLaunch(container: container, game: game, activityID: record.id, runtimeEnvironment: preset.runtimeEnvironment)
         }
     }

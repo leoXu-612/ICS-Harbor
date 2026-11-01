@@ -231,10 +231,10 @@ enum AppSection: String, CaseIterable, Identifiable {
             guard !isWorking else { throw HarborError.unavailable("请等待当前任务结束。") }
             try FileManager.default.createDirectory(at: AppPaths.requests, withIntermediateDirectories: true)
             let file = AppPaths.requests.appendingPathComponent(UUID().uuidString + ".cmd")
-            try LaunchPolicy.batch(appID: game?.appID).write(to: file, atomically: true, encoding: .utf8)
+            let launcher = try WindowsCommand.writeLaunchRequest(LaunchPolicy.batch(appID: game?.appID), to: file)
             var environment = ProcessInfo.processInfo.environment
             environment.merge(runtimeEnvironment) { _, selected in selected }
-            run(title: "启动 \(game?.name ?? "Steam")", executable: container.launcher, arguments: ["WSS-installer", file.path], environment: environment, success: "启动请求已发送，等待实际进程与窗口。", requested: true, activityID: activityID)
+            run(title: "启动 \(game?.name ?? "Steam")", executable: container.launcher, arguments: ["WSS-installer", launcher.path], environment: environment, success: "启动请求已发送，等待实际进程与窗口。", requested: true, activityID: activityID)
         } catch { failLaunch(activityID, reason: error.localizedDescription) }
     }
     func requestStop(_ container: ContainerRecord) {
@@ -242,8 +242,8 @@ enum AppSection: String, CaseIterable, Identifiable {
         do {
             try FileManager.default.createDirectory(at: AppPaths.requests, withIntermediateDirectories: true)
             let file = AppPaths.requests.appendingPathComponent(UUID().uuidString + ".cmd")
-            try LaunchPolicy.shutdownBatch.write(to: file, atomically: true, encoding: .utf8)
-            run(title: "退出 Steam", executable: container.launcher, arguments: ["WSS-installer", file.path], success: "已发送正常退出请求；如果仍在运行，请在 Steam 菜单中选择 Exit。", requested: true)
+            let launcher = try WindowsCommand.writeLaunchRequest(LaunchPolicy.shutdownBatch, to: file)
+            run(title: "退出 Steam", executable: container.launcher, arguments: ["WSS-installer", launcher.path], success: "已发送正常退出请求；如果仍在运行，请在 Steam 菜单中选择 Exit。", requested: true)
         } catch { errorMessage = error.localizedDescription }
     }
     func endManagedRuntime(_ container: ContainerRecord) {

@@ -15,6 +15,27 @@ public struct WindowsApplication: Identifiable, Codable, Hashable, Sendable {
 
 /// Use Wine's existing cmd/start/msiexec implementations, not a second installer.
 public enum WindowsCommand {
+    /// WScript is a GUI host: only the intermediate cmd is hidden. `start`
+    /// still gives the target application its normal window and console policy.
+    /// A relative batch name avoids WshShell.Run expanding %...% in host paths.
+    public static func writeLaunchRequest(_ batch: String, to script: URL) throws -> URL {
+        let launcher = script.deletingPathExtension().appendingPathExtension("vbs")
+        let text = """
+        Option Explicit
+        Dim shell, files, command
+        Set shell = CreateObject("WScript.Shell")
+        Set files = CreateObject("Scripting.FileSystemObject")
+        shell.CurrentDirectory = files.GetParentFolderName(WScript.ScriptFullName)
+        command = Chr(34) & "C:\\windows\\system32\\cmd.exe" & Chr(34) & " /d /s /c " & Chr(34) & Chr(34) & files.GetBaseName(WScript.ScriptFullName) & ".cmd" & Chr(34) & Chr(34)
+        WScript.Quit shell.Run(command, 0, True)
+        """
+        try batch.write(to: script, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: script.path)
+        try text.write(to: launcher, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: launcher.path)
+        return launcher
+    }
+
     public static func validateFile(_ url: URL, installer: Bool) throws {
         let ext = url.pathExtension.lowercased()
         guard ext == "exe" || (installer && ext == "msi") else { throw HarborError.invalid(installer ? "请选择 EXE 或 MSI 安装包。" : "请选择 Windows EXE 程序。") }

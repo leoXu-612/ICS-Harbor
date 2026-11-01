@@ -7,10 +7,11 @@
 <key>CFBundleDisplayName</key><string>Harbor</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>0.5.2</string>
-<key>CFBundleVersion</key><string>9</string>
+<key>CFBundleVersion</key><string>16</string>
 <key>CFBundleIconFile</key><string>Harbor.icns</string>
 <key>LSMinimumSystemVersion</key><string>14.6</string>
 <key>NSPrincipalClass</key><string>NSApplication</string>
 <key>NSHighResolutionCapable</key><true/>
+<key>NSDocumentsFolderUsageDescription</key><string>检查你启动的游戏的显示器配置，并在修正前保存备份。</string>
 <key>NSRemovableVolumesUsageDescription</key><string>读取你选择的 Steam 游戏库，并在你确认后恢复其 Wine 盘符映射。</string>
 </dict></plist>

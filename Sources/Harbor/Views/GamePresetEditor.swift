@@ -21,14 +21,19 @@ struct GamePresetEditor: View {
     }
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("游戏参数").font(.title2.weight(.semibold))
-                    Text(game.name).font(.callout).foregroundStyle(.secondary).lineLimit(2)
+            HStack(alignment: .top, spacing: CDSSpacing.snug) {
+                CDSIconTile(symbol: "slider.horizontal.3", size: 38)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("游戏参数").cdsType(19, .semibold)
+                    Text(game.name).cdsType(11.5).foregroundStyle(CDSColor.textSecondary).lineLimit(2)
                 }
-                Spacer()
-                if draft != model.preset(game.id) { Text("未保存").font(.caption).foregroundStyle(.orange) }
-            }.padding(22)
+                Spacer(minLength: CDSSpacing.tight)
+                if draft != model.preset(game.id) {
+                    CDSPill(title: "未保存", symbol: "circle.fill", color: CDSColor.warning)
+                }
+            }
+            .padding(.horizontal, CDSSpacing.roomy)
+            .padding(.vertical, 18)
             Form {
                 Section("生效范围") {
                     Text("按游戏保存，运行时参数应用到整个 Wine 会话。Steam 及其他 Windows 程序须先正常退出；保存预设本身不改运行中的环境。")
@@ -93,18 +98,25 @@ struct GamePresetEditor: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }.formStyle(.grouped)
-            Divider()
-            HStack {
-                Button("恢复默认") { draft = GamePreset() }
-                Button("载入上次保存") { if let previous = model.state.previousPresets[game.id] { draft = previous } }
-                    .disabled(model.state.previousPresets[game.id] == nil)
+            CDSHairline()
+            HStack(spacing: CDSSpacing.tight) {
+                Button("恢复默认") { draft = GamePreset() }.cdsButton(.ghost, size: .md)
+                Button("载入上次保存") {
+                    if let previous = model.state.previousPresets[game.id] { draft = previous }
+                }
+                .cdsButton(.ghost, size: .md)
+                .disabled(model.state.previousPresets[game.id] == nil)
                 Spacer()
-                Button("取消") { dismiss() }.keyboardShortcut(.cancelAction)
+                Button("取消") { dismiss() }.cdsButton(.ghost, size: .md)
                 Button("保存预设") { if model.savePreset(draft, for: game) { dismiss() } }
-                    .buttonStyle(.borderedProminent).tint(.harborAction).keyboardShortcut(.defaultAction)
+                    .cdsButton(.primary, size: .md)
                     .disabled(draft == model.preset(game.id) || validation != nil || (!allowed && draft.modifiesRuntime))
-            }.padding(18)
-        }.frame(width: 660, height: 720)
+            }
+            .padding(.horizontal, CDSSpacing.roomy)
+            .padding(.vertical, 14)
+        }
+        .frame(width: 660, height: 720)
+        .background(CDSColor.surface1)
             .onAppear { draft = model.preset(game.id) }
             .task {
                 guard let container else { return }

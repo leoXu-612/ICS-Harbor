@@ -73,9 +73,8 @@ extension AppModel {
                     let resultPath = try WindowsCommand.windowsPath(result, container: container)
                     let text = try WindowsCommand.batch(executable: executable, workingDirectory: working, arguments: app?.arguments ?? [], installer: installing, resultPath: resultPath)
                     try LaunchPolicy.apply(.init(), container: container, backupRoot: backups, busy: busy)
-                    try text.write(to: script, atomically: true, encoding: .utf8)
-                    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: script.path)
-                    return .success((script, result, installing && file.pathExtension.lowercased() == "msi" ? "C:\\windows\\system32\\msiexec.exe" : executable))
+                    let launcher = try WindowsCommand.writeLaunchRequest(text, to: script)
+                    return .success((launcher, result, installing && file.pathExtension.lowercased() == "msi" ? "C:\\windows\\system32\\msiexec.exe" : executable))
                 } catch { return .failure(error) }
             }.value
             guard self.launchProgress[record.id]?.isPending == true else { return }
