@@ -2,188 +2,67 @@ import SwiftUI
 import HarborCore
 
 struct ApplicationsView: View {
-    @Bindable var model: AppModel
-    @State private var query = ""
-    @State private var detailsExpanded = false
-    @State private var traffic = TrafficMonitor()
-    @State private var trafficPaused = false
-    @State private var trafficViewport: CGRect = .zero
-    @Environment(\.scenePhase) private var scenePhase
-
-    private var filtered: [WindowsApplication] {
-        model.applications
-            .filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-    }
+    let model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CDSSpacing.roomy) {
-            CDSPageHeader(
-                title: "Windows 应用",
-                subtitle: model.applications.isEmpty
-                    ? "从安装到启动，一条清楚的路径。"
-                    : "\(model.applications.count) 个入口 · 选择应用后在右侧启动。"
-            ) {
-                if !model.applications.isEmpty {
-                    Menu {
-                        Button("安装新软件…") { model.guideApplicationSetup() }
-                        Button("添加已有 EXE…") { model.addApplication() }
-                    } label: {
-                        Label("添加应用", systemImage: "plus")
-                    }
-                    .menuStyle(.button)
-                    .buttonStyle(.borderedProminent)
-                    .tint(CDSColor.clay)
-                    .controlSize(.large)
-                    .fixedSize()
-                }
-            }
-            .padding(.horizontal, CDSSpacing.page)
-            .padding(.top, CDSSpacing.page)
-
-            if model.applications.isEmpty {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: CDSSpacing.roomy) {
-                        ApplicationSetupView(model: model)
-                        Text("只运行可信来源的程序。Wine 环境不是安全沙箱，软件许可和登录仍由你完成。")
-                            .cdsType(10.5)
-                            .foregroundStyle(CDSColor.textMuted)
-                    }
-                    .padding(.horizontal, CDSSpacing.page)
-                    .padding(.bottom, CDSSpacing.section)
-                    .frame(maxWidth: 1000, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
-            } else {
-                HSplitView {
-                    listPanel
-                        .frame(minWidth: 216, idealWidth: 252, maxWidth: 320)
-                    detailPane
-                        .frame(minWidth: 380, maxWidth: .infinity)
-                }
-                .padding(.horizontal, CDSSpacing.page)
-                .padding(.bottom, CDSSpacing.page)
-            }
-        }
-        .background(CDSColor.surface1)
-        .onPreferenceChange(TrafficViewportKey.self) { trafficViewport = $0 }
-        .onAppear { updateTraffic() }
-        .onDisappear { traffic.stop() }
-        .onChange(of: trafficPaused) { _, _ in updateTraffic() }
-        .onChange(of: scenePhase) { _, _ in updateTraffic() }
-        .onChange(of: model.applications) { _, _ in updateTraffic() }
-        .onChange(of: model.state.containers) { _, _ in updateTraffic() }
+        UnifiedCatalogView(model: model, source: .local)
     }
+}
 
-    private func updateTraffic() {
-        if !model.applications.isEmpty && !trafficPaused && scenePhase == .active {
-            traffic.start(containers: model.state.containers, applications: model.applications)
-        } else {
-            traffic.stop()
-        }
-    }
+struct CatalogApplicationInspector: View {
+    let model: AppModel
+    let app: WindowsApplication
+    let status: CatalogStatus
+    @State private var detailsExpanded = false
+    @State private var showTraffic = false
 
-    // MARK: 列表
-
-    private var listPanel: some View {
-        VStack(spacing: CDSSpacing.snug) {
-            CDSField(prompt: "搜索应用", text: $query)
-                .accessibilityLabel("搜索 Windows 应用")
-
-            ScrollView {
-                VStack(spacing: 1) {
-                    ForEach(filtered) { app in
-                        ApplicationRow(model: model, app: app)
-                    }
-                }
-            }
-
-            if filtered.isEmpty {
-                Button("清除搜索") { query = "" }
-                    .cdsButton(.ghost, size: .sm)
-                    .padding(.bottom, 4)
-            }
-        }
-        .padding(CDSSpacing.snug)
-        .background(CDSColor.surface2, in: RoundedRectangle(cornerRadius: CDSRadius.xl, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: CDSRadius.xl, style: .continuous)
-                .strokeBorder(CDSColor.border, lineWidth: 1)
-        }
-    }
-
-    // MARK: 右侧
-
-    private var detailPane: some View {
-        Group {
-            if let app = model.selectedApplication {
-                applicationDetail(app)
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: CDSSpacing.base) {
-                        CDSIntro(symbol: "waveform.path.ecg",
-                                 title: "运行概览",
-                                 message: "选择左侧应用可查看它的连接与资源使用。")
-                            .padding(.top, 8)
-                        TrafficFlowView(monitor: traffic,
-                                        applications: model.applications,
-                                        application: nil,
-                                        paused: $trafficPaused,
-                                        viewport: trafficViewport)
-                    }
-                    .padding(CDSSpacing.roomy)
-                    .frame(maxWidth: 1100, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(minWidth: 380, maxWidth: .infinity)
-                .background(GeometryReader { geometry in
-                    Color.clear.preference(key: TrafficViewportKey.self,
-                                           value: geometry.frame(in: .global))
-                })
-            }
-        }
-    }
-
-    private func applicationDetail(_ app: WindowsApplication) -> some View {
+    var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: CDSSpacing.roomy) {
                 HStack(alignment: .top, spacing: CDSSpacing.snug) {
                     WindowsApplicationIcon(executablePath: app.executablePath)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(app.name).cdsType(18, .semibold).lineLimit(1)
+                        Text(app.name).cdsType(18, .semibold).fixedSize(horizontal: false, vertical: true)
                         Text(model.container(app.containerID)?.name ?? "环境不可用")
                             .cdsType(11).foregroundStyle(CDSColor.textSecondary)
                     }
                     Spacer(minLength: 0)
                 }
 
-                HStack(spacing: CDSSpacing.tight) {
-                    Button("启动应用", systemImage: "play.fill") { model.launchApplication(app) }
-                        .cdsButton(.primary, size: .lg)
-                        .disabled(model.isWorking || model.pendingLaunch(in: app.containerID) != nil)
-                    Button("启动设置…") { model.editApplication(app) }
-                        .cdsButton(.outline, size: .lg)
-                    Menu {
+                CatalogStatusLabel(status: status)
+                    .cdsType(11)
+
+                Button("启动", systemImage: "play.fill") { model.launchApplication(app) }
+                    .cdsButton(.primary, size: .lg, fullWidth: true)
+                    .disabled(model.isWorking || model.pendingLaunch(in: app.containerID) != nil)
+
+                if status == .unreadable {
+                    Text("连接原磁盘，或在启动设置中重新选择 EXE。")
+                        .cdsType(11).foregroundStyle(CDSColor.warning)
+                }
+
+                HStack {
+                    Button("启动设置…", systemImage: "slider.horizontal.3") { model.editApplication(app) }
+                        .cdsButton(.outline, size: .md)
+                    Spacer()
+                    Menu("更多操作") {
                         Button("显示 EXE 文件") { model.reveal(app.executablePath) }
                         Button("移除入口（保留文件）", role: .destructive) { model.forgetApplication(app) }
-                    } label: {
-                        Image(systemName: "ellipsis").font(.system(size: 12, weight: .medium))
                     }
-                    .menuStyle(.borderlessButton)
-                    .frame(width: 28, height: 38)
-                    .accessibilityLabel("应用的其他操作")
-                    Spacer(minLength: 0)
+                    .fixedSize()
                 }
 
                 if let progress = model.applicationProgress(app) {
                     LaunchProgressView(model: model, progress: progress, compact: true)
                 }
 
-                TrafficFlowView(monitor: traffic,
-                                applications: model.applications,
-                                application: app,
-                                paused: $trafficPaused,
-                                viewport: trafficViewport)
+                Button("流量与资源使用…", systemImage: "waveform.path.ecg") { showTraffic = true }
+                    .cdsButton(.outline, size: .md, fullWidth: true)
+
+                Button("来源详情", systemImage: "tray.and.arrow.down") { model.openSourceSettings(.local) }
+                    .cdsButton(.ghost, size: .sm)
+                Button("所在环境", systemImage: "square.3.layers.3d") { model.navigate(.containers) }
+                    .cdsButton(.ghost, size: .sm)
 
                 DisclosureGroup("程序路径与启动参数", isExpanded: $detailsExpanded) {
                     CDSSurface(level: .three, radius: CDSRadius.xl, padding: CDSSpacing.base) {
@@ -198,19 +77,13 @@ struct ApplicationsView: View {
                                     .textSelection(.enabled)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            if !FileManager.default.isReadableFile(atPath: app.executablePath) {
-                                Label("程序文件不可读，请连接原磁盘或编辑入口。",
-                                      systemImage: "externaldrive.badge.exclamationmark")
-                                    .font(.system(size: 10.5))
-                                    .foregroundStyle(CDSColor.warning)
-                            }
                         }
                     }
                     .padding(.top, CDSSpacing.snug)
                 }
                 .font(.system(size: 12, weight: .medium))
 
-                Text("启动普通应用时继承环境原始图形参数。退出请使用程序自己的菜单；关闭 Harbor 不会关闭程序。")
+                Text("通过 EXE 启动时继承环境原始图形参数。退出请使用程序自己的菜单；关闭 Harbor 不会关闭程序。")
                     .cdsType(10.5)
                     .foregroundStyle(CDSColor.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -219,9 +92,7 @@ struct ApplicationsView: View {
             .frame(maxWidth: 1100, alignment: .leading)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(GeometryReader { geometry in
-            Color.clear.preference(key: TrafficViewportKey.self, value: geometry.frame(in: .global))
-        })
+        .sheet(isPresented: $showTraffic) { CatalogTrafficSheet(model: model, application: app) }
     }
 
     private func pathRow(_ title: String, _ value: String) -> some View {
@@ -233,39 +104,6 @@ struct ApplicationsView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-}
-
-// MARK: - 行
-
-private struct ApplicationRow: View {
-    @Bindable var model: AppModel
-    var app: WindowsApplication
-    @State private var hovering = false
-
-    private var selected: Bool { model.selectedApplicationID == app.id }
-
-    var body: some View {
-        Button { model.selectedApplicationID = app.id } label: {
-            HStack(spacing: 9) {
-                WindowsApplicationIcon(executablePath: app.executablePath)
-                    .frame(width: 24, height: 24)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(app.name).cdsType(12, .medium).lineLimit(1)
-                    Text(model.container(app.containerID)?.name ?? "环境已移除")
-                        .cdsType(10).foregroundStyle(CDSColor.textMuted).lineLimit(1)
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 9)
-            .frame(height: 46)
-            .background(selected ? CDSColor.fillGhostSelected
-                         : hovering ? CDSColor.fillGhostHover : .clear,
-                        in: RoundedRectangle(cornerRadius: CDSRadius.lg, style: .continuous))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
     }
 }
 
@@ -437,7 +275,7 @@ struct InstallApplicationView: View {
                     if let file, let id = containerID, let container = model.container(id) {
                         dismiss()
                         model.installApplication(file, container: container)
-                        model.section = .applications
+                        model.navigate(.local)
                     }
                 }
                 .cdsButton(.primary, size: .md)
@@ -456,9 +294,4 @@ struct InstallApplicationView: View {
                 ?? model.state.containers.first(where: { $0.origin == .managed })?.id }
         }
     }
-}
-
-private struct TrafficViewportKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) { value = nextValue() }
 }

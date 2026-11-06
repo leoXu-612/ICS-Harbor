@@ -1,90 +1,65 @@
 import SwiftUI
 import AppKit
 
-// ============================================================================
-// Claude Design System (CDS) — SwiftUI Native Token Layer
-//
-// 令牌来源：open-claude-ui (MIT) 对 Claude Desktop 的逆向提取结果：
-//   · 35 阶暖灰 / 陶土色阶、Surface 0–3 微对比梯度
-//   · 0.5px 发丝边（视网膜补偿）、8 / 10 / 12 / 16 / 20 精密圆角矩阵
-//   · 双环浮层架构、四套生产级弹簧参数
-//   · 暗色模式视网膜光渗字重逆补偿（500→465 / 600→560 / 700→660）
-//
-// 本层只做取值映射，不做 SwiftUI 控件。控件见 CDSControls.swift。
-// ============================================================================
-
-// MARK: - 颜色令牌
-
+// Harbor's semantic colors resolve against the current window appearance.
 enum CDSColor {
-    /// Surface 0 — 侧边栏 / 底层画布
-    static let surface0 = dynamic(light: 0xF9F9F7, dark: 0x0B0B0B)
-    /// Surface 1 — 主内容画布
-    static let surface1 = dynamic(light: 0xFCFCFB, dark: 0x151515)
-    /// Surface 2 — 卡片 / 消息表面
-    static let surface2 = dynamic(light: 0xFFFFFF, dark: 0x1A1A19)
-    /// Surface 3 — 输入框 / 高层浮层
-    static let surface3 = dynamic(light: 0xFFFFFF, dark: 0x20201F)
-    /// 弹出层（暗色下抬升一阶）
-    static let surfacePopover = dynamic(light: 0xFFFFFF, dark: 0x2C2C2A)
+    // Sidebar, canvas, grouped content, controls, and floating panels.
+    static let surface0 = dynamic(light: 0xE8EFF4, dark: 0x0C1723)
+    static let surface1 = dynamic(light: 0xF5F8FA, dark: 0x101D2A)
+    static let surface2 = dynamic(light: 0xFFFFFF, dark: 0x19293A)
+    static let surface3 = dynamic(light: 0xF0F5F8, dark: 0x223447)
+    static let surfacePopover = dynamic(light: 0xFFFFFF, dark: 0x283B4E)
 
-    /// 品牌陶土橙（浅色 #d97757 / 暗色保持同一色相）
-    static let clay = dynamic(light: 0xD97757, dark: 0xD97757)
-    static let clayHover = dynamic(light: 0xCC5A36, dark: 0xE08264)
-    static let clayPressed = dynamic(light: 0xB9502E, dark: 0xC96F4E)
-    /// 陶土极浅背景（选中态 / 弱强调块）
-    static let claySubtle = dynamicAlpha(light: 0xD97757, lightAlpha: 0.10,
-                                         dark: 0xD97757, darkAlpha: 0.16)
+    static let marine = dynamic(light: 0x095C80, dark: 0x90D9FA)
+    static let marineHover = dynamic(light: 0x074E71, dark: 0xAFE6FF)
+    static let marinePressed = dynamic(light: 0x073F5C, dark: 0x70C1E8)
+    static let selectedRow = dynamic(light: 0xD5EAF4, dark: 0x213E52)
+    static let marineSubtle = dynamicAlpha(light: 0x247EA9, lightAlpha: 0.11,
+                                           dark: 0x83D1FA, darkAlpha: 0.12)
 
-    static let textPrimary = dynamic(light: 0x151515, dark: 0xF5F5F5)
-    static let textSecondary = dynamic(light: 0x525252, dark: 0xA3A3A3)
-    static let textMuted = dynamic(light: 0x6E6E6E, dark: 0x8F8F8F)
-    static let textOnAccent = Color.white
+    // Older scenes use the clay names for the app tint, labels, and selections.
+    static let clay = marine
+    static let clayHover = marineHover
+    static let clayPressed = marinePressed
+    static let claySubtle = marineSubtle
 
-    /// 发丝边 / 强发丝边（Alpha 阶梯 10% / 20%，暗色 9% / 18%）
-    static let border = dynamicAlpha(light: 0x080808, lightAlpha: 0.10,
-                                     dark: 0xFFFFFF, darkAlpha: 0.09)
-    static let borderStrong = dynamicAlpha(light: 0x080808, lightAlpha: 0.20,
-                                           dark: 0xFFFFFF, darkAlpha: 0.18)
-    static let borderHairline = dynamicAlpha(light: 0x080808, lightAlpha: 0.07,
-                                             dark: 0xFFFFFF, darkAlpha: 0.06)
+    static let textPrimary = dynamic(light: 0x142636, dark: 0xEDF5FA)
+    static let textSecondary = dynamic(light: 0x384F61, dark: 0xC3D3E1)
+    static let textMuted = dynamic(light: 0x465F71, dark: 0xA3B9CA)
+    static let textOnAccent = dynamic(light: 0xFFFFFF, dark: 0x0A2232)
 
-    /// 交互填充阶梯
-    static let fillGhostHover = dynamicAlpha(light: 0x080808, lightAlpha: 0.05,
-                                             dark: 0xFFFFFF, darkAlpha: 0.05)
-    static let fillGhostSelected = dynamicAlpha(light: 0x080808, lightAlpha: 0.10,
-                                               dark: 0xFFFFFF, darkAlpha: 0.09)
-    static let fillSecondary = dynamicAlpha(light: 0x080808, lightAlpha: 0.10,
-                                           dark: 0xFFFFFF, darkAlpha: 0.09)
-    static let fillSecondaryHover = dynamicAlpha(light: 0x151515, lightAlpha: 0.14,
-                                                 dark: 0xFFFFFF, darkAlpha: 0.14)
-    static let fillTertiary = dynamicAlpha(light: 0x080808, lightAlpha: 0.04,
-                                          dark: 0xFFFFFF, darkAlpha: 0.04)
+    static let border = dynamicAlpha(light: 0x264B65, lightAlpha: 0.22,
+                                     dark: 0xB5D8F1, darkAlpha: 0.20)
+    static let borderStrong = dynamicAlpha(light: 0x264B65, lightAlpha: 0.44,
+                                           dark: 0xB5D8F1, darkAlpha: 0.40)
+    static let borderHairline = dynamicAlpha(light: 0x264B65, lightAlpha: 0.15,
+                                             dark: 0xB5D8F1, darkAlpha: 0.14)
 
-    /// 分段控件轨道与滑块
-    static let segmentedTrack = dynamicAlpha(light: 0x080808, lightAlpha: 0.06,
-                                             dark: 0xFFFFFF, darkAlpha: 0.08)
-    static let segmentedThumb = dynamic(light: 0xFFFFFF, dark: 0x35352F)
+    static let fillGhostHover = dynamicAlpha(light: 0x264B65, lightAlpha: 0.07,
+                                             dark: 0xB5D8F1, darkAlpha: 0.07)
+    static let fillGhostSelected = selectedRow
+    static let fillSecondary = dynamicAlpha(light: 0x264B65, lightAlpha: 0.09,
+                                            dark: 0xB5D8F1, darkAlpha: 0.10)
+    static let fillSecondaryHover = dynamicAlpha(light: 0x264B65, lightAlpha: 0.14,
+                                                 dark: 0xB5D8F1, darkAlpha: 0.16)
+    static let fillTertiary = dynamicAlpha(light: 0x264B65, lightAlpha: 0.04,
+                                           dark: 0xB5D8F1, darkAlpha: 0.05)
 
-    /// 语义状态色 —— 与陶土色同温度的低饱和选择
-    static let signal = dynamic(light: 0x2F7D5A, dark: 0x6FBF95)
-    static let warning = dynamic(light: 0xA9701F, dark: 0xD9A441)
-    static let fault = dynamic(light: 0xC0392B, dark: 0xF87171)
-    static let info = dynamic(light: 0x2A78D6, dark: 0x6BA6E8)
+    static let segmentedTrack = fillTertiary
+    static let segmentedThumb = marine
 
-    /// 遮罩 / 分区底
-    static let scrim = dynamicAlpha(light: 0x000000, lightAlpha: 0.28,
-                                    dark: 0x000000, darkAlpha: 0.55)
+    // Green denotes a healthy or running service; blue denotes interaction.
+    static let signal = dynamic(light: 0x216345, dark: 0x8AD7AE)
+    static let warning = dynamic(light: 0x794A10, dark: 0xF1C581)
+    static let fault = dynamic(light: 0xA02F3E, dark: 0xFFA7AA)
+    static let info = marine
+    static let scrim = dynamicAlpha(light: 0x081522, lightAlpha: 0.28,
+                                    dark: 0x040C15, darkAlpha: 0.56)
 
     // MARK: 构造工具
 
     private static func dynamic(light: UInt32, dark: UInt32) -> Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            let hex = isDark(appearance) ? dark : light
-            return NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
-                           green: CGFloat((hex >> 8) & 0xFF) / 255,
-                           blue: CGFloat(hex & 0xFF) / 255,
-                           alpha: 1)
-        })
+        dynamicAlpha(light: light, lightAlpha: 1, dark: dark, darkAlpha: 1)
     }
 
     private static func dynamicAlpha(light: UInt32, lightAlpha: CGFloat,
@@ -152,27 +127,14 @@ enum CDSMotion {
     }
 }
 
-// MARK: - 排版（暗色字重逆补偿）
+// MARK: - SF typography
 
 enum CDSType {
-    /// CDS 光学补偿：暗色下 500→465、600→560、700→660。
-    /// SwiftUI 无法设定可变字重轴，按最近一档下调实现等效补偿。
-    static func compensated(_ weight: Font.Weight, dark: Bool) -> Font.Weight {
-        guard dark else { return weight }
-        switch weight {
-        case .medium: return .regular
-        case .semibold: return .medium
-        case .bold: return .semibold
-        case .heavy, .black: return .bold
-        default: return weight
-        }
-    }
+    // Keep the same SF hierarchy in either appearance, especially for small labels.
+    static func compensated(_ weight: Font.Weight, dark: Bool) -> Font.Weight { weight }
 }
 
-// MARK: - View 扩展
-
 extension View {
-    /// CDS 字体：默认 SF 系统无衬线（Editorial Warmth，不使用圆体）。
     func cdsType(_ size: CGFloat,
                  _ weight: Font.Weight = .regular,
                  tracking: CGFloat? = nil,
@@ -193,18 +155,16 @@ extension View {
 }
 
 private struct CDSTypeModifier: ViewModifier {
-    @Environment(\.colorScheme) private var scheme
     let size: CGFloat
     let weight: Font.Weight
     let tracking: CGFloat?
     let mono: Bool
 
     func body(content: Content) -> some View {
-        let resolved = CDSType.compensated(weight, dark: scheme == .dark)
-        return content
+        content
             .font(mono
-                  ? .system(size: size, weight: resolved, design: .monospaced)
-                  : .system(size: size, weight: resolved))
+                  ? .system(size: size, weight: weight, design: .monospaced)
+                  : .system(size: size, weight: weight))
             .tracking(tracking ?? defaultTracking)
     }
 
@@ -268,6 +228,7 @@ private struct CDSHairlineModifier: ViewModifier {
         content.overlay {
             RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .strokeBorder(color, lineWidth: width ?? max(1 / displayScale, 0.5))
+                .allowsHitTesting(false)
         }
     }
 }
@@ -275,9 +236,8 @@ private struct CDSHairlineModifier: ViewModifier {
 // MARK: - 兼容层：把旧品牌名映射到 CDS（其余代码无需改动）
 
 extension Color {
-    /// 旧品牌色 → 陶土橙
-    static let harbor = CDSColor.clay
-    static let harborAction = CDSColor.clay
+    static let harbor = CDSColor.marine
+    static let harborAction = CDSColor.marine
     static let harborSignal = CDSColor.signal
     static let harborWarning = CDSColor.warning
     static let harborFault = CDSColor.fault

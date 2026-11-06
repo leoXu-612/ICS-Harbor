@@ -1,70 +1,80 @@
 import SwiftUI
 import HarborCore
 
-/// Client lifecycle belongs to the environment, not to each game inspector.
+/// A Steam session belongs to exactly one Wine environment.
 struct SteamSessionControls: View {
-    @Bindable var model: AppModel
+    let model: AppModel
     let container: ContainerRecord
+    @State private var expanded = false
 
     private var runtime: RuntimeInfo? { model.runtime[container.id] }
     private var signal: LaunchEvidence? { model.containerSignals[container.id] }
     private var running: Bool { signal?.steamPID != nil }
     private var pending: LaunchProgress? { model.pendingLaunch(in: container.id) }
-
+    private var conflict: Bool { model.hasLibraryConflict(container) }
+    private var missing: Bool { runtime?.hasSteam == false }
+    private var occupied: Bool { model.busy.contains(container.id) || signal?.runtimeRunning == true || running }
     private var status: String {
-        guard let runtime else { return "正在检查" }
-        if !runtime.hasSteam { return "未检测到 Steam" }
-        if pending?.isSteamClient == true { return "正在启动" }
-        guard signal != nil else { return "状态待确认" }
-        return running ? signal?.connection.title ?? "状态待确认" : "未运行"
+        if conflict { return "游戏库冲突" }
+        if pending?.isSteamClient == true { return "启动请求处理中" }
+        if running { return signal?.connection.title ?? "连接状态待确认" }
+        guard runtime != nil else { return "等待检查" }
+        if missing { return "未检测到 Steam" }
+        return signal == nil ? "会话待确认" : "未检测到客户端进程"
     }
-
-    private var launchTitle: String {
-        guard let runtime else { return "检查 Steam…" }
-        if pending?.isSteamClient == true { return "正在启动…" }
-        if running { return "显示 Steam" }
-        if runtime.hasSteam { return "启动 Steam" }
-        return container.origin == .managed ? "准备 Steam" : "未安装 Steam"
-    }
-
-    private var dotKind: CDSStatusDot.Kind { (pending != nil || running) ? .live : .idle }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CDSSpacing.snug) {
-            HStack(spacing: 7) {
-                Image(systemName: "gamecontroller")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(CDSColor.textSecondary)
-                Text("Steam").cdsType(12, .semibold)
-                Text("客户端").cdsType(10).foregroundStyle(CDSColor.textMuted)
-                Spacer(minLength: CDSSpacing.tight)
-                HStack(spacing: 5) {
-                    CDSStatusDot(kind: dotKind, size: 5)
-                    Text(status).cdsType(10.5)
+        CDSSurface(level: .two, padding: CDSSpacing.base) {
+            DisclosureGroup(isExpanded: $expanded) {
+                VStack(alignment: .leading, spacing: CDSSpacing.snug) {
+                    if conflict { LibraryConflictNotice() }
+                    if let pending {
+                        Label("正在处理：\(pending.title)", systemImage: "hourglass")
+                            .foregroundStyle(CDSColor.warning)
+                    }
+                    if missing && container.origin == .linked {
+                        Text("请先在原环境中完成 Steam 安装。Harbor 不会重建关联环境。")
+                    } else if missing {
+                        Text("准备操作会在此环境中运行 Steam 安装器。请先退出该环境中的程序。")
+                    } else {
+                        Text("安装游戏、处理登录或更新请打开此客户端。请求退出前，请先保存并退出游戏。")
+                    }
+                    HStack(spacing: CDSSpacing.tight) {
+                        if missing {
+                            if container.origin == .managed {
+                                Button("准备 Steam", systemImage: "shippingbox") {
+                                    model.provision(container, installSteam: true)
+                                }
+                                .cdsButton(.primary, size: .sm)
+                                .disabled(occupied || pending != nil || model.isWorking || conflict)
+                            }
+                        } else {
+                            Button(running ? "显示 Steam" : "启动 Steam", systemImage: running ? "macwindow" : "play.fill") {
+                                model.openSteam(container)
+                            }
+                            .cdsButton(.primary, size: .sm)
+                            .disabled(runtime == nil || model.isWorking || pending != nil || conflict)
+                        }
+                        if !missing || running {
+                            Button("正常退出 Steam…", systemImage: "power") { model.requestStop(container) }
+                                .cdsButton(.outline, size: .sm)
+                                .disabled(!running || model.isWorking || pending != nil)
+                        }
+                    }
                 }
-                .foregroundStyle(running && signal?.connection == .online ? CDSColor.signal : CDSColor.textSecondary)
-            }
-
-            HStack(spacing: CDSSpacing.tight) {
-                Button { model.openSteam(container) } label: {
-                    Label(launchTitle, systemImage: running ? "macwindow" : pending != nil ? "hourglass" : "play.fill")
+                .cdsType(11.5)
+                .foregroundStyle(CDSColor.textSecondary)
+                .padding(.top, CDSSpacing.snug)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } label: {
+                HStack(spacing: CDSSpacing.tight) {
+                    Image(systemName: "square.3.layers.3d").foregroundStyle(CDSColor.textSecondary)
+                    Text(container.name).cdsType(13, .semibold)
+                    Spacer(minLength: CDSSpacing.tight)
+                    CDSStatusDot(kind: conflict ? .fault : running ? .live : .idle, size: 5)
+                    Text(status).cdsType(11).foregroundStyle(CDSColor.textSecondary)
                 }
-                .cdsButton(.primary, size: .md)
-                .disabled(runtime == nil || model.isWorking || pending != nil
-                          || (model.hasLibraryConflict(container) && !running)
-                          || (runtime?.hasSteam == false && container.origin == .linked))
-
-                Button("正常退出 Steam", systemImage: "power") { model.requestStop(container) }
-                    .cdsButton(.outline, size: .md)
-                    .disabled(!running || model.isWorking || pending != nil)
             }
-
-            Text(running
-                 ? "先保存并退出游戏，再正常退出 Steam。关闭 Harbor 不会停止这个环境。"
-                 : "安装新游戏、处理登录或更新提示，都从这里打开 Steam；已有游戏可从游戏库直接启动。")
-                .cdsType(10)
-                .foregroundStyle(CDSColor.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

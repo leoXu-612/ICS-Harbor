@@ -120,7 +120,7 @@ struct PresetsView: View {
 
     private func presetRow(_ game: GameRecord) -> some View {
         Button {
-            model.section = .library
+            model.navigate(.library)
             model.selectedGameID = game.id
         } label: {
             HStack(spacing: CDSSpacing.snug) {

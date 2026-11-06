@@ -96,6 +96,7 @@ public struct AppState: Codable, Sendable {
     public var bindings: [DriveBinding] = []
     public var activity: [ActivityRecord] = []
     // Optional so states written before standalone applications remain readable.
+    public var contentKinds: [String: CatalogKind]?
     public var applications: [WindowsApplication]?
     public init() {}
 }

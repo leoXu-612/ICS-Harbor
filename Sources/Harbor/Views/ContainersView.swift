@@ -3,13 +3,12 @@ import HarborCore
 
 struct ContainersView: View {
     @Bindable var model: AppModel
-    @State private var drivesExpanded = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: CDSSpacing.roomy) {
                 CDSPageHeader(title: "运行环境",
-                              subtitle: "Steam 的启动与退出集中在这里。已有游戏和应用从各自资料库打开。") {
+                              subtitle: "查看哪些内容共用一个 Wine 环境，并分别维护引擎、磁盘与图形参数。") {
                     Menu {
                         Button("创建新环境…") { model.presentCreate() }
                         Button("关联已有环境…") { model.linkContainer() }
@@ -38,36 +37,6 @@ struct ContainersView: View {
 
                 CDSHairline().padding(.top, 4)
 
-                DisclosureGroup("外置盘与盘符 · 高级维护", isExpanded: $drivesExpanded) {
-                    VStack(alignment: .leading, spacing: CDSSpacing.base) {
-                        Text("绑定后会按磁盘唯一标识，在重连时自动补回缺失盘符。已有盘符不会被替换，Steam 库登记也不会改动。")
-                            .cdsType(11)
-                            .foregroundStyle(CDSColor.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        ForEach(model.state.bindings) { binding in
-                            HStack(spacing: CDSSpacing.tight) {
-                                Label("\(binding.volumeName) → \(binding.letter):", systemImage: "externaldrive")
-                                    .font(.system(size: 11.5, weight: .medium))
-                                Spacer()
-                                Button("检查并恢复") { model.repair(binding) }
-                                    .cdsButton(.outline, size: .xs)
-                                    .disabled(DriveMapper.target(for: binding, volumes: model.volumes) == nil)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 8)
-                            .background(CDSColor.fillTertiary,
-                                        in: RoundedRectangle(cornerRadius: CDSRadius.lg, style: .continuous))
-                        }
-
-                        Button("绑定缺失盘符…", systemImage: "link.badge.plus") { model.showBind = true }
-                            .cdsButton(.outline, size: .md)
-                            .disabled(model.state.containers.isEmpty)
-                    }
-                    .padding(.top, CDSSpacing.base)
-                }
-                .font(.system(size: 12, weight: .medium))
-
                 Button("不确定该怎么做？查看使用指南", systemImage: "questionmark.circle") { model.section = .guide }
                     .cdsButton(.ghost, size: .sm)
             }
@@ -81,6 +50,7 @@ struct ContainersView: View {
 
 struct BindDriveView: View {
     @Bindable var model: AppModel
+    var fixedContainer: ContainerRecord? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var selectedContainer: UUID?
     @State private var volumeID = ""
@@ -93,8 +63,12 @@ struct BindDriveView: View {
                         symbol: "externaldrive.badge.plus")
 
             Form {
-                Picker("容器", selection: $selectedContainer) {
-                    ForEach(model.state.containers) { Text($0.name).tag(Optional($0.id)) }
+                if let fixedContainer {
+                    LabeledContent("运行环境", value: fixedContainer.name)
+                } else {
+                    Picker("运行环境", selection: $selectedContainer) {
+                        ForEach(model.state.containers) { Text($0.name).tag(Optional($0.id)) }
+                    }
                 }
                 Picker("磁盘", selection: $volumeID) {
                     Text("选择已挂载磁盘").tag("")
@@ -118,19 +92,20 @@ struct BindDriveView: View {
                 Spacer()
                 Button("取消") { dismiss() }.cdsButton(.ghost, size: .md)
                 Button("检查并绑定") {
-                    if let id = selectedContainer,
+                    if let id = fixedContainer?.id ?? selectedContainer,
                        let container = model.container(id),
                        let volume = model.volumes.first(where: { $0.id == volumeID }) {
                         model.bindDrive(container: container, letter: letter, volume: volume)
+                        if fixedContainer != nil { dismiss() }
                     }
                 }
                 .cdsButton(.primary, size: .md)
-                .disabled(selectedContainer == nil || volumeID.isEmpty)
+                .disabled((fixedContainer == nil && selectedContainer == nil) || volumeID.isEmpty || model.isWorking)
             }
         }
         .padding(CDSSpacing.section)
         .frame(width: 520)
         .background(CDSColor.surface1)
-        .onAppear { selectedContainer = model.state.containers.first?.id }
+        .onAppear { selectedContainer = fixedContainer?.id ?? model.state.containers.first?.id }
     }
 }

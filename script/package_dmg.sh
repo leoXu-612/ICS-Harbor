@@ -3,7 +3,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-HARBOR_BUILD_CONFIGURATION=release ./script/build_and_run.sh --build-only
+mkdir -p "$ROOT/dist"
 VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' script/Info.plist)
 BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' script/Info.plist)
 NAME="ICS-Harbor-${VERSION}-preview.${BUILD}-arm64"
@@ -11,7 +11,7 @@ TEMP_STAGE="$(mktemp -d "$ROOT/dist/.harbor-dmg.XXXXXX")"
 trap 'rm -rf "$TEMP_STAGE"' EXIT
 STAGE="$TEMP_STAGE/stage"
 mkdir -p "$STAGE/docs"
-ditto "$ROOT/dist/Harbor.app" "$STAGE/Harbor.app"
+HARBOR_BUILD_CONFIGURATION=release ./script/build_and_run.sh --build-only "$STAGE"
 ln -s /Applications "$STAGE/Applications"
 cp README.md LICENSE THIRD_PARTY_NOTICES.md "$STAGE/"
 cp docs/ARCHITECTURE.md docs/PARAMETERS.md docs/VALIDATION.md "$STAGE/docs/"

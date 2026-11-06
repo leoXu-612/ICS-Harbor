@@ -6,11 +6,17 @@ MODE="${1:-run}"
 CONFIGURATION="${HARBOR_BUILD_CONFIGURATION:-debug}"
 case "$CONFIGURATION" in debug|release) ;; *) printf 'Unsupported build configuration\n' >&2; exit 2 ;; esac
 APP="$ROOT/dist/Harbor.app"
+if [ "$#" -gt 1 ]; then
+  [ "$MODE" = "--build-only" ] && [ -d "$2" ] || { echo "Fresh output directory required for --build-only" >&2; exit 2; }
+  APP="$2/Harbor.app"
+  [ ! -e "$APP" ] && [ ! -L "$APP" ] || { echo "Output app already exists" >&2; exit 2; }
+fi
 BINARY="$APP/Contents/MacOS/Harbor"
 # A live Wine server can retain Harbor's macOS TCC attribution. Replacing this
 # ad-hoc signed launcher underneath it invalidates removable-volume access.
 # Refuse the update; never kill a game in order to complete a build.
-if ps -axo comm= | awk '/\/SharedSupport\/wine\/.*\/wineserver$/ { found=1 } END { exit !found }'; then
+# A first build-only bundle in a fresh checkout cannot replace a running launcher.
+if { [ "$MODE" != "--build-only" ] || [ -e "$APP" ] || [ -L "$APP" ]; } && ps -axo comm= | awk '/\/SharedSupport\/wine\/.*\/wineserver$/ { found=1 } END { exit !found }'; then
   printf 'Harbor update stopped: a Sikarugir Wine environment is still running.\nSave and quit games, then stop their Wine environments before rebuilding or replacing Harbor.\nNo app or game was stopped.\n' >&2
   exit 3
 fi

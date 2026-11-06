@@ -19,15 +19,17 @@ extension AppModel {
             }
             state.applications = values
             guard save() else { state.applications = old; return false }
-            selectedApplicationID = app.id; section = .applications
+            navigate(.library); selectedApplicationID = app.id
             notice = "已保存应用入口，未复制或移动程序文件。"; return true
         } catch { errorMessage = error.localizedDescription; return false }
     }
     func forgetApplication(_ app: WindowsApplication) {
         guard Panels.confirm(title: "移除 \(app.name) 的入口？", message: "只移除 Harbor 中的启动记录，程序、文档与设置全部保留。这不是卸载。", action: "移除入口") else { return }
-        let old = state.applications
+        let old = state
+        state.contentKinds?[app.catalogKey] = nil
+        state.favorites.remove(app.catalogKey)
         state.applications?.removeAll { $0.id == app.id }
-        if save() { selectedApplicationID = nil } else { state.applications = old }
+        if save() { selectedApplicationID = nil } else { state = old }
     }
     func applicationProgress(_ app: WindowsApplication) -> LaunchProgress? {
         launchProgress.values.filter { $0.applicationID == app.id }.max { $0.startedAt < $1.startedAt }
@@ -65,7 +67,7 @@ extension AppModel {
                         try WindowsCommand.validateFile(file, installer: true)
                     } else if let app { try WindowsCommand.validate(app, container: container) }
                     let executable = try WindowsCommand.windowsPath(file, container: container)
-                    guard executable.lowercased() != "c:\\program files (x86)\\steam\\steam.exe" else { throw HarborError.invalid("Steam 请从运行环境页启动，以保留游戏库冲突检查和连接状态。") }
+                    guard executable.lowercased() != "c:\\program files (x86)\\steam\\steam.exe" else { throw HarborError.invalid("Steam 请从「来源 → Steam → 接入设置」启动，以保留游戏库冲突检查和连接状态。") }
                     let working = try WindowsCommand.windowsPath(URL(fileURLWithPath: app?.workingDirectory ?? file.deletingLastPathComponent().path), container: container)
                     try FileManager.default.createDirectory(at: requests, withIntermediateDirectories: true)
                     let script = requests.appendingPathComponent(record.id.uuidString + ".cmd")

@@ -33,7 +33,7 @@ struct GameInspector: View {
                             Text(game.name)
                                 .cdsType(18, .semibold)
                                 .fixedSize(horizontal: false, vertical: true)
-                            Text(container?.name ?? "未知环境")
+                            Text("运行于 " + (container?.name ?? "未知环境"))
                                 .cdsType(10.5)
                                 .foregroundStyle(CDSColor.textSecondary)
                         }
@@ -65,7 +65,7 @@ struct GameInspector: View {
                         }
                     } label: {
                         Label(pending ? "正在启动…"
-                              : progress?.isObservedRunning == true ? "显示游戏窗口" : "启动游戏",
+                              : progress?.isObservedRunning == true ? "显示窗口" : "启动",
                               systemImage: pending ? "hourglass"
                               : progress?.isObservedRunning == true ? "macwindow" : "play.fill")
                     }
@@ -81,7 +81,7 @@ struct GameInspector: View {
                         Button("查看库冲突") { model.section = .containers }
                             .cdsButton(.ghost, size: .xs)
                     } else if game.availability == .ready {
-                        Text("需要时会自动打开 Steam。启动后可在“启动记录”查看每个阶段。")
+                        Text("需要时会自动打开 Steam。启动后可在“任务与诊断”查看每个阶段。")
                             .cdsType(10)
                             .foregroundStyle(CDSColor.textMuted)
                             .fixedSize(horizontal: false, vertical: true)
@@ -107,7 +107,7 @@ struct GameInspector: View {
                             .textSelection(.enabled)
                             .fixedSize(horizontal: false, vertical: true)
                         if let path = game.installDirectory {
-                            Button("显示游戏文件", systemImage: "folder") { model.reveal(path) }
+                            Button("显示安装目录", systemImage: "folder") { model.reveal(path) }
                                 .cdsButton(.ghost, size: .xs)
                         }
                     }
@@ -115,7 +115,7 @@ struct GameInspector: View {
                     CDSHairline()
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Button("游戏参数…", systemImage: "slider.horizontal.3") { showPresetEditor = true }
+                        Button("启动选项…", systemImage: "slider.horizontal.3") { showPresetEditor = true }
                             .cdsButton(.outline, size: .md, fullWidth: true)
                         Text(model.preset(game.id).summary)
                             .cdsType(10.5)
@@ -126,6 +126,12 @@ struct GameInspector: View {
                             .foregroundStyle(CDSColor.textMuted)
                     }
 
+                    Button { model.openSourceSettings(.steam) } label: {
+                        Label("Steam 接入设置", systemImage: "link")
+                    }.cdsButton(.ghost, size: .sm)
+                    Button { model.navigate(.containers) } label: {
+                        Label(container?.name ?? "运行环境", systemImage: "square.3.layers.3d")
+                    }.cdsButton(.ghost, size: .sm)
                     DisclosureGroup("安装信息", isExpanded: $technicalExpanded) {
                         VStack(alignment: .leading, spacing: 7) {
                             CDSKeyValue(label: "Steam App ID", value: game.appID, mono: true)

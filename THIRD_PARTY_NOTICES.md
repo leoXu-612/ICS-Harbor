@@ -33,3 +33,29 @@ Harbor 的 Swift、脚本适配层和帆船图标为本仓库实现。MIT 许可
 Harbor 不是 Valve、Apple、Sikarugir 或游戏发行商的官方产品。Steam 名称仅说明兼容目标。应用使用独立帆船图标，不将 Steam 商标作为应用身份。
 
 游戏封面只显示本机 Steam 缓存，不随本应用分发。验收截图保存在本地 `docs/evidence`，不打入用户下载包。用户必须自行拥有游戏及账号；Harbor 不提供游戏文件、DRM 绕过或反作弊规避。
+
+## 接入设置切换动效
+
+SwiftUI 选项切换使用 [Amicro snappy 弹簧参数](https://github.com/Subhan-code/Amicro--Micro-transitions-/blob/9b14576b187f8e5e713ae3f1a57f7e7b3902985a/registry/lib/presets.ts)。仅移植质量、刚度与阻尼参数，不捆绑 React 或 Motion 运行时。
+
+MIT License
+
+Copyright (c) 2026 SYED  SUBHAN UDDIN
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

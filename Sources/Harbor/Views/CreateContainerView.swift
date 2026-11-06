@@ -4,7 +4,7 @@ import HarborCore
 struct CreateContainerView: View {
     @Bindable var model: AppModel
     @Environment(\.dismiss) private var dismiss
-    @State private var name = "Windows 应用"
+    @State private var name = "通用环境"
     @State private var purpose: ContainerPurpose = .applications
 
     private var purposeBinding: Binding<ContainerPurpose> { $purpose }
@@ -16,8 +16,8 @@ struct CreateContainerView: View {
                         symbol: "shippingbox.fill")
 
             CDSSegmented(selection: purposeBinding, items: [
-                .init(value: .applications, title: "通用应用 · 不装 Steam"),
-                .init(value: .steam, title: "Steam 游戏")
+                .init(value: .applications, title: "仅准备 Wine"),
+                .init(value: .steam, title: "同时安装 Steam")
             ])
 
             VStack(alignment: .leading, spacing: 6) {
@@ -79,7 +79,7 @@ struct CreateContainerView: View {
         .background(CDSColor.surface1)
         .onAppear {
             purpose = model.creationPurpose
-            name = purpose == .steam ? "Steam 游戏" : "Windows 应用"
+            name = purpose == .steam ? "Steam 环境" : "通用环境"
         }
     }
 

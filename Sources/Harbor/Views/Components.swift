@@ -11,7 +11,7 @@ import HarborCore
 
 enum HarborMotion {
     static func feedback(reduced: Bool) -> Animation {
-        reduced ? .easeOut(duration: 0.1) : CDSMotion.snappy
+        reduced ? .linear(duration: 0) : CDSMotion.snappy
     }
 }
 
@@ -40,13 +40,7 @@ struct PageHeading: View {
     var subtitle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title).cdsType(24, .semibold)
-            Text(subtitle)
-                .cdsType(12.5)
-                .foregroundStyle(CDSColor.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
+        CDSPageHeader(title: title, subtitle: subtitle)
     }
 }
 
@@ -59,11 +53,11 @@ struct LocalArtwork: View {
             Image(nsImage: image).resizable().scaledToFill()
         } else {
             ZStack {
-                LinearGradient(colors: [CDSColor.claySubtle, CDSColor.fillTertiary],
+                LinearGradient(colors: [CDSColor.selectedRow, CDSColor.surface3, CDSColor.surface2],
                                startPoint: .topLeading, endPoint: .bottomTrailing)
                 Image(systemName: symbol)
                     .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(CDSColor.clay.opacity(0.55))
+                    .foregroundStyle(CDSColor.marine)
             }
         }
     }

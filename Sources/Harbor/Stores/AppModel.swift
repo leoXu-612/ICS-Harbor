@@ -4,13 +4,6 @@ import HarborCore
 import OSLog
 import Observation
 
-enum AppSection: String, CaseIterable, Identifiable {
-    case library, applications, containers, presets, activity, guide
-    var id: String { rawValue }
-    var title: String { switch self { case .library: return "游戏库"; case .applications: return "Windows 应用"; case .containers: return "运行环境"; case .presets: return "参数说明"; case .activity: return "启动记录"; case .guide: return "使用指南" } }
-    var symbol: String { switch self { case .library: return "gamecontroller"; case .applications: return "app.badge"; case .containers: return "shippingbox"; case .presets: return "slider.horizontal.3"; case .activity: return "clock.arrow.circlepath"; case .guide: return "book.closed" } }
-}
-
 @MainActor @Observable final class AppModel {
     var state = AppState()
     var games: [GameRecord] = []
@@ -23,9 +16,8 @@ enum AppSection: String, CaseIterable, Identifiable {
     var conflictingLibraries: Set<String> = []
     var errorMessage: String?
     var notice: String?
+    var sourceSettingsVisible = false
     var section: AppSection = .library
-    var search = ""
-    var favoritesOnly = false
     var selectedGameID: String?
     var showCreate = false
     var creationPurpose: ContainerPurpose = .applications
@@ -58,7 +50,6 @@ enum AppSection: String, CaseIterable, Identifiable {
         let firstRun = !FileManager.default.fileExists(atPath: store.stateURL.path)
         do { state = try store.load() }
         catch { canPersist = false; errorMessage = "Harbor 配置无法读取，原文件未覆盖。\n\(error.localizedDescription)" }
-        if !state.containers.isEmpty && state.containers.allSatisfy({ !$0.preparesSteam }) { section = .applications }
         if canPersist {
             for index in state.activity.indices where state.activity[index].state == .running {
                 state.activity[index].state = .failed
@@ -87,13 +78,6 @@ enum AppSection: String, CaseIterable, Identifiable {
     }
 
     var selectedGame: GameRecord? { games.first { $0.id == selectedGameID } }
-    var filteredGames: [GameRecord] {
-        games.filter { (!favoritesOnly || state.favorites.contains($0.id)) && (search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) || $0.appID.contains(search)) }
-            .sorted {
-                let a = state.favorites.contains($0.id), b = state.favorites.contains($1.id)
-                return a != b ? a : $0.name.localizedStandardCompare($1.name) == .orderedAscending
-            }
-    }
     var readyCount: Int { games.filter { $0.availability == .ready }.count }
     var offlineCount: Int { games.filter { $0.availability == .offline }.count }
     var isWorking: Bool { activeTaskID != nil }
@@ -256,11 +240,13 @@ enum AppSection: String, CaseIterable, Identifiable {
         guard !isWorking, pendingLaunch(in: container.id) == nil, !ProcessProbe.isBusy(container, entries: ProcessProbe.entries()) else { errorMessage = "请先结束此容器的运行任务，再移除记录。"; return }
         guard Panels.confirm(title: "从 Harbor 移除 \(container.name)？", message: "只移除列表记录和 Harbor 的应用入口、游戏预设、收藏、磁盘绑定。容器文件、应用、游戏和存档全部保留；之后可重新关联。", action: "移除记录，保留文件") else { return }
         state.containers.removeAll { $0.id == container.id }
+        let localKeys = Set(applications.filter { $0.containerID == container.id }.map(\.catalogKey))
         state.applications?.removeAll { $0.containerID == container.id }
         let prefix = container.id.uuidString + ":"
         state.presets = state.presets.filter { !$0.key.hasPrefix(prefix) }
         state.previousPresets = state.previousPresets.filter { !$0.key.hasPrefix(prefix) }
-        state.favorites = state.favorites.filter { !$0.hasPrefix(prefix) }
+        state.favorites = state.favorites.filter { !$0.hasPrefix(prefix) && !localKeys.contains($0) }
+        state.contentKinds = state.contentKinds?.filter { !$0.key.hasPrefix(prefix) && !localKeys.contains($0.key) }
         state.bindings.removeAll { $0.containerID == container.id }
         selectedGameID = nil; save(); notice = "记录已移除，原文件保留在原位置。"
         Task { await refresh() }

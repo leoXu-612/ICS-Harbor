@@ -1,10 +1,5 @@
 import SwiftUI
 
-// ============================================================================
-// CDS 控件层 —— 按钮阶梯、分段胶囊、发丝分隔、状态指示、卡片与字段
-// 所有数值来自 open-claude-ui 的令牌层，不在此处另造一套。
-// ============================================================================
-
 // MARK: - 按钮
 
 struct CDSButtonStyle: ButtonStyle {
@@ -26,29 +21,23 @@ struct CDSButtonStyle: ButtonStyle {
         let fullWidth: Bool
 
         @Environment(\.isEnabled) private var enabled
+        @Environment(\.isFocused) private var focused
         @Environment(\.accessibilityReduceMotion) private var reduceMotion
         @State private var hovering = false
 
         var body: some View {
             configuration.label
-                .font(.system(size: fontSize, weight: .medium))
+                .font(.system(size: fontSize, weight: variant == .primary ? .semibold : .medium))
                 .lineLimit(1)
                 .padding(.horizontal, hPadding)
                 .frame(height: height)
                 .frame(maxWidth: fullWidth ? .infinity : nil)
                 .foregroundStyle(foreground)
                 .background(background, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
-                .overlay {
-                    if variant == .outline {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .strokeBorder(CDSColor.border, lineWidth: 1)
-                    }
-                }
+                .cdsHairlineBorder(radius: radius, color: edge, width: focused ? 2 : nil)
                 .contentShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-                .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
-                .opacity(enabled ? (configuration.isPressed ? 0.86 : 1) : 0.45)
-                .animation(reduceMotion ? nil : CDSMotion.press, value: configuration.isPressed)
-                .animation(reduceMotion ? nil : CDSMotion.snappy, value: hovering)
+                .animation(CDSMotion.honoring(reduceMotion, CDSMotion.press), value: configuration.isPressed)
+                .animation(CDSMotion.honoring(reduceMotion, CDSMotion.press), value: hovering)
                 .onHover { hovering = $0 }
         }
 
@@ -68,7 +57,17 @@ struct CDSButtonStyle: ButtonStyle {
             switch size { case .xs, .sm: CDSRadius.md; case .md, .lg: CDSRadius.lg }
         }
 
+        private var edge: Color {
+            if focused && enabled { return variant == .primary ? CDSColor.textOnAccent : CDSColor.marine }
+            switch variant {
+            case .outline: return CDSColor.borderStrong
+            case .secondary: return CDSColor.border
+            default: return .clear
+            }
+        }
+
         private var foreground: Color {
+            guard enabled else { return CDSColor.textMuted }
             switch variant {
             case .primary: return CDSColor.textOnAccent
             case .secondary: return CDSColor.textPrimary
@@ -78,18 +77,19 @@ struct CDSButtonStyle: ButtonStyle {
         }
 
         private var background: Color {
+            guard enabled else { return variant == .ghost ? .clear : CDSColor.fillTertiary }
             switch variant {
             case .primary:
-                return configuration.isPressed ? CDSColor.clayPressed
-                     : hovering ? CDSColor.clayHover : CDSColor.clay
+                return configuration.isPressed ? CDSColor.marinePressed
+                     : hovering ? CDSColor.marineHover : CDSColor.marine
             case .secondary:
-                return hovering ? CDSColor.fillSecondaryHover : CDSColor.fillSecondary
-            case .ghost:
-                return hovering ? CDSColor.fillGhostHover : .clear
-            case .outline:
-                return hovering ? CDSColor.fillGhostHover : .clear
+                return configuration.isPressed ? CDSColor.selectedRow
+                     : hovering ? CDSColor.fillSecondaryHover : CDSColor.fillSecondary
+            case .ghost, .outline:
+                return configuration.isPressed ? CDSColor.fillSecondaryHover
+                     : hovering ? CDSColor.fillGhostHover : .clear
             case .danger:
-                return hovering ? CDSColor.fault.opacity(0.16) : CDSColor.fault.opacity(0.10)
+                return CDSColor.fault.opacity(configuration.isPressed ? 0.20 : hovering ? 0.14 : 0.08)
             }
         }
     }
@@ -140,12 +140,7 @@ struct CDSSurface<Content: View>: View {
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(level.color, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
-            .overlay {
-                if bordered {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .strokeBorder(CDSColor.border, lineWidth: 1)
-                }
-            }
+            .cdsHairlineBorder(radius: radius, color: bordered ? CDSColor.border : .clear)
     }
 }
 
@@ -177,6 +172,7 @@ struct CDSSegmented<Value: Hashable>: View {
     @Binding var selection: Value
     var items: [Item]
     var compact = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Namespace private var thumb
 
     var body: some View {
@@ -184,7 +180,7 @@ struct CDSSegmented<Value: Hashable>: View {
             ForEach(items) { item in
                 let active = item.value == selection
                 Button {
-                    withAnimation(CDSMotion.snappy) { selection = item.value }
+                    selection = item.value
                 } label: {
                     HStack(spacing: 5) {
                         if let symbol = item.symbol {
@@ -194,7 +190,7 @@ struct CDSSegmented<Value: Hashable>: View {
                             Text(title).font(.system(size: compact ? 11 : 12, weight: .medium))
                         }
                     }
-                    .foregroundStyle(active ? CDSColor.textPrimary : CDSColor.textSecondary)
+                    .foregroundStyle(active ? CDSColor.textOnAccent : CDSColor.textSecondary)
                     .padding(.horizontal, compact ? 8 : 11)
                     .padding(.vertical, compact ? 3 : 4)
                     .frame(maxWidth: .infinity)
@@ -204,16 +200,18 @@ struct CDSSegmented<Value: Hashable>: View {
                             RoundedRectangle(cornerRadius: CDSRadius.md, style: .continuous)
                                 .fill(CDSColor.segmentedThumb)
                                 .matchedGeometryEffect(id: "thumb", in: thumb)
-                                .cdsShadow(.sm)
                         }
                     }
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(active ? .isSelected : [])
             }
         }
+        .animation(CDSMotion.honoring(reduceMotion, CDSMotion.press), value: selection)
         .padding(2)
         .background(CDSColor.segmentedTrack, in: RoundedRectangle(cornerRadius: CDSRadius.lg, style: .continuous))
+        .cdsHairlineBorder(radius: CDSRadius.lg)
         .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -236,32 +234,12 @@ struct CDSStatusDot: View {
 
     var kind: Kind
     var size: CGFloat = 6
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var phase = false
-
     var body: some View {
-        ZStack {
-            if kind == .live {
-                Circle()
-                    .stroke(kind.color.opacity(phase ? 0 : 0.35), lineWidth: 1)
-                    .frame(width: size * 2.6, height: size * 2.6)
-                    .scaleEffect(phase ? 1.25 : 0.7)
-            }
-            Circle()
-                .fill(kind.color)
-                .frame(width: size, height: size)
-                .opacity(kind == .idle ? 0.55 : phase ? 1 : 0.45)
-        }
-        .frame(width: size * 2.6, height: size * 2.6)
-        .onAppear(perform: start)
-        .accessibilityHidden(true)
-    }
-
-    private func start() {
-        guard !reduceMotion else { return }
-        withAnimation(.easeInOut(duration: kind.period).repeatForever(autoreverses: true)) {
-            phase = true
-        }
+        Circle()
+            .fill(kind.color)
+            .frame(width: size, height: size)
+            .frame(width: size * 2.6, height: size * 2.6)
+            .accessibilityHidden(true)
     }
 }
 
@@ -293,9 +271,16 @@ struct CDSPageHeader<Trailing: View>: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: CDSSpacing.base) {
-            VStack(alignment: .leading, spacing: 5) {
-                Text(title).cdsType(22, .semibold)
-                Text(subtitle).cdsType(12.5).foregroundStyle(CDSColor.textSecondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .cdsType(22, .semibold)
+                    .foregroundStyle(CDSColor.textPrimary)
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .cdsType(13)
+                        .foregroundStyle(CDSColor.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             Spacer(minLength: CDSSpacing.base)
             trailing
@@ -319,9 +304,9 @@ struct CDSSectionHeader<Trailing: View>: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: CDSSpacing.snug) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).cdsType(15, .semibold)
+                Text(title).cdsType(15, .semibold).foregroundStyle(CDSColor.textPrimary)
                 if !subtitle.isEmpty {
-                    Text(subtitle).cdsType(10.5).foregroundStyle(CDSColor.textSecondary)
+                    Text(subtitle).cdsType(11.5).foregroundStyle(CDSColor.textSecondary)
                 }
             }
             Spacer(minLength: CDSSpacing.snug)
@@ -348,11 +333,11 @@ struct CDSIntro: View {
         VStack(spacing: CDSSpacing.base) {
             ZStack {
                 RoundedRectangle(cornerRadius: CDSRadius.dialog, style: .continuous)
-                    .fill(CDSColor.claySubtle)
+                    .fill(CDSColor.marineSubtle)
                     .frame(width: 56, height: 56)
                 Image(systemName: symbol)
                     .font(.system(size: 22, weight: .light))
-                    .foregroundStyle(CDSColor.clay)
+                    .foregroundStyle(CDSColor.marine)
             }
             VStack(spacing: 6) {
                 Text(title).cdsType(16, .semibold)
@@ -389,15 +374,18 @@ struct CDSField: View {
             if let symbol {
                 Image(systemName: symbol)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(focused ? CDSColor.clay : CDSColor.textMuted)
+                    .foregroundStyle(focused ? CDSColor.marine : CDSColor.textMuted)
             }
             TextField(prompt, text: $text)
                 .textFieldStyle(.plain)
-                .font(.system(size: 12.5))
+                .font(.system(size: 13))
+                .foregroundStyle(CDSColor.textPrimary)
+                .tint(CDSColor.marine)
                 .focused($focused)
             if !text.isEmpty {
                 Button {
                     text = ""
+                    focused = true
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 11))
@@ -410,11 +398,9 @@ struct CDSField: View {
         .padding(.horizontal, 10)
         .frame(height: 30)
         .background(CDSColor.surface3, in: RoundedRectangle(cornerRadius: CDSRadius.panel, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: CDSRadius.panel, style: .continuous)
-                .strokeBorder(focused ? CDSColor.clay : CDSColor.border,
-                              lineWidth: focused ? 1.5 : 1)
-        }
+        .cdsHairlineBorder(radius: CDSRadius.panel,
+                           color: focused ? CDSColor.marine : CDSColor.borderStrong,
+                           width: focused ? 2 : nil)
         .animation(CDSMotion.honoring(reduceMotion, CDSMotion.press), value: focused)
     }
 }
@@ -424,7 +410,7 @@ struct CDSField: View {
 struct CDSNotice: View {
     var text: String
     var symbol: String = "info.circle.fill"
-    var tone: Color = CDSColor.clay
+    var tone: Color = CDSColor.marine
     var onClose: (() -> Void)? = nil
 
     var body: some View {
@@ -466,13 +452,11 @@ struct CDSCardSurface: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(CDSColor.surface2, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(selected ? CDSColor.clay
-                                  : hovering ? CDSColor.borderStrong : CDSColor.border,
-                                  lineWidth: selected ? 2 : 1)
-            }
+            .background(selected ? CDSColor.selectedRow : CDSColor.surface2,
+                        in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .cdsHairlineBorder(radius: radius,
+                               color: selected ? CDSColor.marine : hovering ? CDSColor.borderStrong : CDSColor.border,
+                               width: selected ? 1.5 : nil)
     }
 }
 
@@ -508,7 +492,7 @@ struct CDSScrollFade<Content: View>: View {
 struct CDSIconTile: View {
     var symbol: String
     var size: CGFloat = 34
-    var tint: Color = CDSColor.clay
+    var tint: Color = CDSColor.marine
 
     var body: some View {
         ZStack {
@@ -550,7 +534,7 @@ struct CDSKeyValue: View {
 
 struct CDSProgressBar: View {
     var fraction: Double
-    var tint: Color = CDSColor.clay
+    var tint: Color = CDSColor.marine
     var height: CGFloat = 4
 
     var body: some View {
@@ -609,7 +593,7 @@ struct CDSMenuLabel: View {
         .foregroundStyle(variant == .primary ? CDSColor.textOnAccent : CDSColor.textPrimary)
         .padding(.horizontal, 12)
         .frame(height: 32)
-        .background(variant == .primary ? CDSColor.clay : CDSColor.fillSecondary,
+        .background(variant == .primary ? CDSColor.marine : CDSColor.fillSecondary,
                     in: RoundedRectangle(cornerRadius: CDSRadius.lg, style: .continuous))
     }
 }

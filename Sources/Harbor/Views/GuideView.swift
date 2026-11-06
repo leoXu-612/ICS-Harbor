@@ -11,13 +11,13 @@ struct GuideView: View {
 
                 CDSSurface(level: .two, radius: CDSRadius.xl, padding: 0) {
                     VStack(spacing: 0) {
-                        route("玩已经安装的游戏",
-                              detail: "进入游戏库，选中封面，再点右侧“启动游戏”。需要时会自动打开对应的 Steam。",
-                              symbol: "gamecontroller", button: "进入游戏库") { model.section = .library }
+                        route("启动已添加的内容",
+                              detail: "在全部内容中搜索名称，按类型或环境筛选，选中条目后在详情中启动。",
+                              symbol: "gamecontroller", button: "打开全部内容") { model.navigate(.library) }
                         CDSHairline(inset: 60)
                         route("安装 Windows 软件",
                               detail: "先准备独立环境，再运行 EXE/MSI 安装包。装好后添加程序入口；便携版可以跳过安装。",
-                              symbol: "app.badge", button: "开始添加应用") { model.section = .applications }
+                              symbol: "app.badge", button: "开始添加应用") { model.openSourceSettings(.local) }
                         CDSHairline(inset: 60)
                         route("接入以前创建的环境",
                               detail: "选择已有 Sikarugir .app。只登记入口，不复制账号、游戏或存档，也不重建原来的环境。",
@@ -29,8 +29,8 @@ struct GuideView: View {
                     Text("运行中，怎么操作？").cdsType(15, .semibold)
                     VStack(alignment: .leading, spacing: CDSSpacing.base) {
                         help("想打开或退出 Steam",
-                             "统一在“运行环境”操作。退出前先保存并关闭游戏；关闭 Harbor 本身不会结束 Windows 程序。",
-                             destination: .containers, action: "管理 Steam")
+                             "前往「Steam → 接入设置」，选择运行该客户端的环境。退出前先保存并关闭游戏；关闭 Harbor 本身不会结束 Windows 程序。",
+                             destination: .steam, action: "管理 Steam")
                         help("不知道是在加载还是卡住",
                              "“启动记录”显示已确认的检查点和等待时间。没有新状态时会提示等待较久；“停止跟踪”不会强杀程序。",
                              destination: .activity, action: "查看启动记录")
@@ -91,7 +91,7 @@ struct GuideView: View {
                 .cdsType(11)
                 .foregroundStyle(CDSColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Button(action) { model.section = destination }
+            Button(action) { if let source = destination.source { model.openSourceSettings(source) } else { model.navigate(destination) } }
                 .cdsButton(.ghost, size: .xs)
                 .padding(.top, 1)
         }
