@@ -43,7 +43,7 @@ struct ContentView: View {
             Spacer(minLength: 8)
             footer
         }
-        .background(CDSColor.surface0)
+        .background { FluoriteBackdrop(tone: CDSColor.surface0) }
     }
 
     private var brand: some View {

@@ -2,7 +2,7 @@
 
 A native macOS manager for Windows applications and Steam games, powered by Wine.
 
-ICS-Harbor 是 ICS 系列的原生 macOS Windows 应用与 Steam 游戏管理器。Harbor 意为“港湾”，沿用已有帆船标识与应用名称。0.6.0 是可在本机运行的开发预览，不是已公证的公开正式发行版。
+ICS-Harbor 是 ICS 系列的原生 macOS Windows 应用与 Steam 游戏管理器。Harbor 意为“港湾”，沿用已有帆船标识与应用名称。0.6.1 是可在本机运行的开发预览，不是已公证的公开正式发行版。
 
 仓库与项目名称为 **ICS-Harbor**；应用仍为 `Harbor.app`，现有数据目录、Bundle ID 和容器路径不变，不因项目命名而迁移用户数据。
 
@@ -122,7 +122,7 @@ Codex 的 Run 按钮使用同一脚本。其他参数：`--build-only`、`--logs
 ./script/package_dmg.sh
 ```
 
-默认输出 `dist/Harbor-0.6.0-Preview.zip` 及 SHA-256。应用资源从 `.app/Contents/Resources` 读取，不依赖源码或 SwiftPM 的绝对构建路径。GUI 可用 `--data-root /absolute/test/path` 隔离验收数据。升级前应备份 `state.json`；回退旧版应用需使用对应的状态备份，避免旧版丢弃新增应用记录或无法读取新增任务类型。
+默认输出 `dist/Harbor-0.6.1-Preview.zip` 及 SHA-256。应用资源从 `.app/Contents/Resources` 读取，不依赖源码或 SwiftPM 的绝对构建路径。GUI 可用 `--data-root /absolute/test/path` 隔离验收数据。升级前应备份 `state.json`；回退旧版应用需使用对应的状态备份，避免旧版丢弃新增应用记录或无法读取新增任务类型。
 
 ## 状态与限制
 

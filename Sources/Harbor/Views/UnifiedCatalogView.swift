@@ -172,6 +172,7 @@ struct UnifiedCatalogView: View {
                                 .padding()
                             }
                             .frame(width: 320, height: 180)
+                            .background { FluoriteBackdrop(tone: CDSColor.surfacePopover) }
                         }
                 }
             }

@@ -4,18 +4,20 @@ import AppKit
 // Harbor's semantic colors resolve against the current window appearance.
 enum CDSColor {
     // Sidebar, canvas, grouped content, controls, and floating panels.
-    static let surface0 = dynamic(light: 0xE8EFF4, dark: 0x0C1723)
-    static let surface1 = dynamic(light: 0xF5F8FA, dark: 0x101D2A)
-    static let surface2 = dynamic(light: 0xFFFFFF, dark: 0x19293A)
-    static let surface3 = dynamic(light: 0xF0F5F8, dark: 0x223447)
-    static let surfacePopover = dynamic(light: 0xFFFFFF, dark: 0x283B4E)
+    static let surface0 = dynamic(light: 0xE8ECF6, dark: 0x101527)
+    static let surface1 = dynamic(light: 0xF5F6FB, dark: 0x151B2D)
+    static let surface2 = dynamic(light: 0xFFFFFF, dark: 0x1D263B)
+    static let surface3 = dynamic(light: 0xEFF2F9, dark: 0x283249)
+    static let surfacePopover = dynamic(light: 0xFFFFFF, dark: 0x2B354E)
 
-    static let marine = dynamic(light: 0x095C80, dark: 0x90D9FA)
-    static let marineHover = dynamic(light: 0x074E71, dark: 0xAFE6FF)
-    static let marinePressed = dynamic(light: 0x073F5C, dark: 0x70C1E8)
-    static let selectedRow = dynamic(light: 0xD5EAF4, dark: 0x213E52)
-    static let marineSubtle = dynamicAlpha(light: 0x247EA9, lightAlpha: 0.11,
-                                           dark: 0x83D1FA, darkAlpha: 0.12)
+    // Fluorite blue: deep cobalt in light mode, periwinkle in dark mode.
+    static let marine = dynamic(light: 0x405AB3, dark: 0x98ACFF)
+    static let marineHover = dynamic(light: 0x354CA2, dark: 0xB1BFFF)
+    static let marinePressed = dynamic(light: 0x293E89, dark: 0x8498F0)
+    static let selectedRow = dynamicAlpha(light: 0x4A61C0, lightAlpha: 0.16,
+                                          dark: 0x849AFF, darkAlpha: 0.24)
+    static let marineSubtle = dynamicAlpha(light: 0x4A61C0, lightAlpha: 0.12,
+                                           dark: 0x91A6FF, darkAlpha: 0.17)
 
     // Older scenes use the clay names for the app tint, labels, and selections.
     static let clay = marine
@@ -23,27 +25,27 @@ enum CDSColor {
     static let clayPressed = marinePressed
     static let claySubtle = marineSubtle
 
-    static let textPrimary = dynamic(light: 0x142636, dark: 0xEDF5FA)
-    static let textSecondary = dynamic(light: 0x384F61, dark: 0xC3D3E1)
-    static let textMuted = dynamic(light: 0x465F71, dark: 0xA3B9CA)
-    static let textOnAccent = dynamic(light: 0xFFFFFF, dark: 0x0A2232)
+    static let textPrimary = dynamic(light: 0x192139, dark: 0xEFF2FF)
+    static let textSecondary = dynamic(light: 0x414C65, dark: 0xC6CEE2)
+    static let textMuted = dynamic(light: 0x525F78, dark: 0xAAB6CC)
+    static let textOnAccent = dynamic(light: 0xFFFFFF, dark: 0x121B39)
 
-    static let border = dynamicAlpha(light: 0x264B65, lightAlpha: 0.22,
-                                     dark: 0xB5D8F1, darkAlpha: 0.20)
-    static let borderStrong = dynamicAlpha(light: 0x264B65, lightAlpha: 0.44,
-                                           dark: 0xB5D8F1, darkAlpha: 0.40)
-    static let borderHairline = dynamicAlpha(light: 0x264B65, lightAlpha: 0.15,
-                                             dark: 0xB5D8F1, darkAlpha: 0.14)
+    static let border = dynamicAlpha(light: 0x344974, lightAlpha: 0.22,
+                                     dark: 0xBECCF6, darkAlpha: 0.20)
+    static let borderStrong = dynamicAlpha(light: 0x344974, lightAlpha: 0.44,
+                                           dark: 0xBECCF6, darkAlpha: 0.40)
+    static let borderHairline = dynamicAlpha(light: 0x344974, lightAlpha: 0.15,
+                                             dark: 0xBECCF6, darkAlpha: 0.14)
 
-    static let fillGhostHover = dynamicAlpha(light: 0x264B65, lightAlpha: 0.07,
-                                             dark: 0xB5D8F1, darkAlpha: 0.07)
+    static let fillGhostHover = dynamicAlpha(light: 0x344974, lightAlpha: 0.07,
+                                             dark: 0xBECCF6, darkAlpha: 0.07)
     static let fillGhostSelected = selectedRow
-    static let fillSecondary = dynamicAlpha(light: 0x264B65, lightAlpha: 0.09,
-                                            dark: 0xB5D8F1, darkAlpha: 0.10)
-    static let fillSecondaryHover = dynamicAlpha(light: 0x264B65, lightAlpha: 0.14,
-                                                 dark: 0xB5D8F1, darkAlpha: 0.16)
-    static let fillTertiary = dynamicAlpha(light: 0x264B65, lightAlpha: 0.04,
-                                           dark: 0xB5D8F1, darkAlpha: 0.05)
+    static let fillSecondary = dynamicAlpha(light: 0x344974, lightAlpha: 0.09,
+                                            dark: 0xBECCF6, darkAlpha: 0.10)
+    static let fillSecondaryHover = dynamicAlpha(light: 0x344974, lightAlpha: 0.14,
+                                                 dark: 0xBECCF6, darkAlpha: 0.16)
+    static let fillTertiary = dynamicAlpha(light: 0x344974, lightAlpha: 0.04,
+                                           dark: 0xBECCF6, darkAlpha: 0.05)
 
     static let segmentedTrack = fillTertiary
     static let segmentedThumb = marine

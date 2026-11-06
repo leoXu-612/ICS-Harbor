@@ -13,10 +13,10 @@ func icon(_ size: Int, name: String) throws {
 
     let background = NSBezierPath(roundedRect: NSRect(x: 25, y: 25, width: 974, height: 974),
                                   xRadius: 212, yRadius: 212)
-    let midnight = NSColor(srgbRed: 0.047, green: 0.09, blue: 0.137, alpha: 1)
-    let marine = NSColor(srgbRed: 0.125, green: 0.32, blue: 0.46, alpha: 1)
-    let ice = NSColor(srgbRed: 0.565, green: 0.851, blue: 0.98, alpha: 1)
-    NSGradient(starting: midnight, ending: marine)!.draw(in: background, angle: 110)
+    let midnight = NSColor(srgbRed: 0.063, green: 0.082, blue: 0.153, alpha: 1)
+    let cobalt = NSColor(srgbRed: 0.224, green: 0.318, blue: 0.616, alpha: 1)
+    let fluorite = NSColor(srgbRed: 0.596, green: 0.675, blue: 1, alpha: 1)
+    NSGradient(starting: midnight, ending: cobalt)!.draw(in: background, angle: 110)
 
     func shape(_ points: [NSPoint], color: NSColor) {
         let path = NSBezierPath()
@@ -28,7 +28,7 @@ func icon(_ size: Int, name: String) throws {
     }
 
     shape([.init(x: 250, y: 370), .init(x: 490, y: 775), .init(x: 490, y: 370)], color: .white)
-    shape([.init(x: 533, y: 710), .init(x: 758, y: 370), .init(x: 533, y: 370)], color: ice)
+    shape([.init(x: 533, y: 710), .init(x: 758, y: 370), .init(x: 533, y: 370)], color: fluorite)
     shape([.init(x: 214, y: 322), .init(x: 803, y: 322), .init(x: 691, y: 221), .init(x: 350, y: 221)],
           color: .white)
     let wave = NSBezierPath()
@@ -37,7 +37,7 @@ func icon(_ size: Int, name: String) throws {
     wave.curve(to: .init(x: 781, y: 171), controlPoint1: .init(x: 600, y: 126), controlPoint2: .init(x: 680, y: 210))
     wave.lineWidth = max(19, 1024 / CGFloat(size))
     wave.lineCapStyle = .round
-    ice.setStroke()
+    fluorite.setStroke()
     wave.stroke()
     NSGraphicsContext.restoreGraphicsState()
 

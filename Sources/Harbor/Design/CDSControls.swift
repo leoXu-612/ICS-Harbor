@@ -117,6 +117,22 @@ struct HarborTileButtonStyle: ButtonStyle {
 
 // MARK: - 表面
 
+/// A tinted native material for navigation and transient panels. Apply it only
+/// to the background, so type, artwork, and the primary action stay opaque.
+struct FluoriteBackdrop: View {
+    var tone: Color
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    var body: some View {
+        if reduceTransparency {
+            tone
+        } else {
+            Rectangle().fill(.regularMaterial)
+                .overlay(tone.opacity(0.76))
+        }
+    }
+}
+
 struct CDSSurface<Content: View>: View {
     enum Level { case zero, one, two, three
         var color: Color {
